@@ -38,7 +38,7 @@ class KNearestRegression(object):
 
     def run_knearest_regression(self):
 
-        # action on the model
+        # action on the models
         action_on_model = self.config.get('knr', 'action_on_model')
         if action_on_model == 'fit':
             return self.fit()
@@ -66,12 +66,12 @@ class SupportVectorRegression(object):
         pass
 
 
-class RandomForestRegression(object):
+class DesicionTreeRegression(object):
 
     def __init__(self, config):
         self.config = config
 
-    def fit(self) -> object:
+    def fit(self):
         pass
 
     def fit_predict(self):
@@ -80,7 +80,7 @@ class RandomForestRegression(object):
     def predict(self):
         pass
 
-    def run_randomforest_regression(self):
+    def run_decisiontree_regression(self):
         pass
 
 
