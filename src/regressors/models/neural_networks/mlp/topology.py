@@ -48,7 +48,7 @@ def topology(config, exp_folder, load_weights=False, weights_model_fitted_path=N
 
     model.summary()
 
-    # plot model's topology
+    # plot models's topology
     plot_modelTopology(model, exp_folder, config)
 
     # -- Load weights: only if it selects the predict_load_model or auto

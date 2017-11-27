@@ -43,12 +43,12 @@ def lstm_topology(config, exp_folder):
 
     model.summary()
 
-    # plot model's topology
+    # plot models's topology
     plot_modelTopology(model, exp_folder, config)
 
     opt = Adam(lr=lr)
 
-    #model.compile(lost='mean_squared_error',
+    #models.compile(lost='mean_squared_error',
     #              optimizer=opt,
     #              metrics=['mae'])
 

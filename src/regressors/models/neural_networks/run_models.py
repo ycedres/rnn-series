@@ -37,7 +37,7 @@ class MLP(object):
 
     def run_mlp(self):
 
-        # action on the model
+        # action on the models
         action_on_model = self.config.get('mlp', 'action_on_model')
 
         if action_on_model == 'fit':
@@ -74,7 +74,7 @@ class RNN(object):
 
     def run_rnn(self):
 
-        # action on the model
+        # action on the models
         action_on_model = self.config.get ('rnn', 'action_on_model')
 
         if action_on_model == 'fit':
@@ -113,7 +113,7 @@ class LSTM(object):
 
     def run_lstm(self):
 
-        # action on the model
+        # action on the models
         action_on_model = self.config.get ('lstm', 'action_on_model')
 
         if action_on_model == 'fit':
@@ -152,7 +152,7 @@ class StackLSTM(object):
 
     def run_stack_lstm(self):
 
-        # action on the model
+        # action on the models
         action_on_model = self.config.get ('stack_lstm', 'action_on_model')
 
         if action_on_model == 'fit':

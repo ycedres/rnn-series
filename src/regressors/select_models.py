@@ -42,6 +42,9 @@ class SelectModels(object):
 
         print('* I am at models')
 
+        # get the return of all model selected
+        list_models = []
+
         # -- machine learning
         # k-nearest regression
         if self.dic_models['knr'] == 'true':
@@ -82,7 +85,7 @@ class SelectModels(object):
         # long short-term memory regression
         if self.dic_models['lstm'] == 'true':
 
-            print('I am in model - LSTM')
+            print('I am in models - LSTM')
             lstm_obj = LSTM(self.config, self.exp_folder)
             predicted = lstm_obj.run_lstm()
 
@@ -91,7 +94,7 @@ class SelectModels(object):
         # long short-term memory regression
         if self.dic_models['stack_lstm'] == 'true':
 
-            print ('I am in model - Stack LSTM')
+            print ('I am in models - Stack LSTM')
             lstm_obj = StackLSTM(self.config, self.exp_folder)
             predicted = lstm_obj.run_stack_lstm()
 
