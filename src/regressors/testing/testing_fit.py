@@ -19,6 +19,8 @@ class CSVInputManager(object):
         # load dataset in dataframe
         return pd.read_csv(self._filename, self._delimiter)
 
+    def read_dataframe(self)
+        return pd.read_csv(self._filename, self._delimiter)
 
     def split_dataset(self,df):
         # Split the dataset

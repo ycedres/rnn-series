@@ -1,14 +1,18 @@
 import sys
-sys.path.insert(0,'../')
+sys.path.insert(0, '../')
 
-from testing.testing_fit import CSVInputManager
+from input_manager.testing_fit import CSVInputManager
 from models.ml.KNNRegressor import KNNRegressor
-#from models.neural_networks.svr.SVR import SVRRegresion
+from models.ml.DecisionTreeRegressor import RDecisionTree
+from crossvalidation.train_test_split import TrainTestSplit
+# from models.neural_networks.svr.SVR import SVRRegresion
 
 from configparser import ConfigParser
-#Models == Receivers
+# Models == Receivers
 
-#Invoker
+
+
+# Invoker
 class Runner(object):
     def __init__(self):
         self._queue = []
@@ -34,26 +38,35 @@ class LocalRunner(Runner):
     def run_operation(operation):
         operation.excecute()
 
-#Command
+# Command
+
+
 class Operation(object):
-    def __init__(self,model):
+    def __init__(self, model):
         self._model = model
 
-#Specific Commands
+# Specific Commands
+
+
 class TrainOperation(Operation):
 
-    def __init__(self,model):
+    def __init__(self, model):
         self._model = model
 
-    def run(self,data):
-        self._model.train(data['training_data'],data['testing_data'])
+    def run(self, data):
+        print(data)
+        tts = TrainTestSplit(df=data)
+        tts.dataframe_split()
+        self._model.train(data['training_data'], data['testing_data'])
+
 
 class TestOperation(Operation):
 
-    def __init__(self,model):
+    def __init__(self, model):
         self._model = model
-    def run(self,data):
-        return self._model.test(data['training_data'],data['testing_data'])
+
+    def run(self, data):
+        return self._model.test(data['training_data'], data['testing_data'])
 
 
 
@@ -136,14 +149,18 @@ class Experiment(object):
     def read_input(self):
         return self._input_manager.read_input()
 
+    def read_input_df(self):
+        return self._input_manager.load_data()
+
     def read_target(self):
         return self._input_manager.read_target()
 
-    #RUNNER
-    def run_operation(self,operation):
-        self._output = operation.run(self.read_input())
+    # RUNNER
+    def run_operation(self, operation):
+        # self._output = operation.run(self.read_input())
+        self._output = operation.run(self.read_dataframe())
 
-    #OUTPUT
+    # OUTPUT
     def save_output(self):
         self._output_manager.save(self._output)
 
@@ -158,17 +175,33 @@ if __name__ == "__main__":
 
     file_config_manager = FileConfigManager(filename='config.ini')
     filename = file_config_manager.get_input_filename()
-    input_manager = CSVInputManager(filename=filename,delimiter=';') #FileInputManager, DataBaseInputManager
-    output_manager = OutputManager() #FileOutputManager
+    input_manager = CSVInputManager(filename=filename, delimiter=';')
+    output_manager = OutputManager()
     local_runner = LocalRunner()
 
-    experiment_knr = Experiment(config_manager=file_config_manager,input_manager=input_manager,\
-    output_manager=output_manager,runner=local_runner)
+    # experiment_knr = Experiment(config_manager=file_config_manager,
+    #                             input_manager=input_manager,
+    #                             output_manager=output_manager,
+    #                             runner=local_runner)
 
-    knr = KNNRegressor(file_config_manager.get_model_config(name='knr'))  #Invoker
-    knr_train_operation = TrainOperation(knr)
-    knr_test_operation = TestOperation(knr)
+    # Invoker
+    # knr = KNNRegressor(file_config_manager.get_model_config(name='knr'))
+    # knr_train_operation = TrainOperation(knr)
+    # knr_test_operation = TestOperation(knr)
+    #
+    # experiment_knr.run_operation(knr_train_operation)
+    # experiment_knr.run_operation(knr_test_operation)
+    # experiment_knr.print_output()
 
-    experiment_knr.run_operation(knr_train_operation)
-    experiment_knr.run_operation(knr_test_operation)
-    experiment_knr.print_output()
+    # DTR
+    df_input_manager = CSVInputManager(filename=filename, delimiter=';')
+    experiment_dtr = Experiment(config_manager=file_config_manager,
+                                input_manager=df_input_manager,
+                                output_manager=output_manager,
+                                runner=local_runner)
+
+    dtr = RDecisionTree(file_config_manager.
+                        get_model_config(name='dtr'))
+
+    dtr_train_operation = TrainOperation(dtr)
+    experiment_dtr.run_operation(dtr_train_operation)
