@@ -57,7 +57,7 @@ class TrainOperation(Operation):
         tts = TrainTestSplit(df=data)
         tts.dataframe_split()
         #self._model.train(data['training_data'], data['testing_data'])
-        self._model.train(tts.get_features(), tts.get_target(), tts.get_validation())
+        self._model.train(tts.get_features(), tts.get_target(), tts.get_validation(),tts.get_target_validation())
 
 
 class TestOperation(Operation):
@@ -66,7 +66,10 @@ class TestOperation(Operation):
         self._model = model
 
     def run(self, data):
-        return self._model.test(data['training_data'], data['testing_data'])
+        tts = TrainTestSplit(df=data)
+        #return self._model.test(data['training_data'], data['testing_data'])
+        tts.dataframe_split()
+        return self._model.test(tts.get_features_test_set())
 
 
 
@@ -208,3 +211,7 @@ if __name__ == "__main__":
 
     dtr_train_operation = TrainOperation(dtr)
     experiment_dtr.run_operation(dtr_train_operation)
+
+    dtr_test_operation = TestOperation(dtr)
+    result = experiment_dtr.run_operation(dtr_test_operation)
+    experiment_dtr.print_output()

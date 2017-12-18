@@ -41,7 +41,6 @@ class TrainTestSplit(object):
         features_columns = self._train_set.columns[1:-1]
         # select the values of features and target columns.
         features_train_set = self._train_set[features_columns]
-        print ("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@: ",features_train_set.shape)
         return features_train_set
 
     def get_target(self):
@@ -51,8 +50,15 @@ class TrainTestSplit(object):
 
     def get_validation(self):
         features_columns = self._train_set.columns[1:-1]
-        target_column = self._train_set.columns[-1:]
-
         features_validation_set = self._validation_set[features_columns]
+        return features_validation_set
+
+    def get_target_validation(self):
+        target_column = self._train_set.columns[-1:]
         target_validation_set = self._validation_set[target_column]
         return target_validation_set
+
+    def get_features_test_set(self):
+        features_columns = self._train_set.columns[1:-1]
+        features_test_set = self._test_set[features_columns]
+        return features_test_set
