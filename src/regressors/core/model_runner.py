@@ -1,7 +1,7 @@
 import sys
 sys.path.insert(0, '../')
 
-from input_manager.testing_fit import CSVInputManager
+from crossvalidation.csv_input_manager import CSVInputManager
 from models.ml.KNNRegressor import KNNRegressor
 from models.ml.DecisionTreeRegressor import RDecisionTree
 from crossvalidation.train_test_split import TrainTestSplit
@@ -54,10 +54,10 @@ class TrainOperation(Operation):
         self._model = model
 
     def run(self, data):
-        print(data)
         tts = TrainTestSplit(df=data)
         tts.dataframe_split()
-        self._model.train(data['training_data'], data['testing_data'])
+        #self._model.train(data['training_data'], data['testing_data'])
+        self._model.train(tts.get_features(), tts.get_target(), tts.get_validation())
 
 
 class TestOperation(Operation):
@@ -148,6 +148,9 @@ class Experiment(object):
 
     def read_input(self):
         return self._input_manager.read_input()
+
+    def read_dataframe(self):
+        return self._input_manager.read_dataframe()
 
     def read_input_df(self):
         return self._input_manager.load_data()
