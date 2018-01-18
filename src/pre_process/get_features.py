@@ -37,6 +37,6 @@ def get_features(ts, date=None, window_size=10, horizont=1, padding=0,
     df = pd.concat([df_target_date, df_features, df_target], axis=1)
 
     if write_csv_file is True:
-        df.to_csv('{0}_h_{1}.csv'.format(filename, horizont),
+        df.to_csv('{0}_h_{1:0=2d}.csv'.format(filename, horizont),
                   sep=';', float_format='%.2f', index=False)
     return df
