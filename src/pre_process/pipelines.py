@@ -9,9 +9,9 @@ Data Engineering Pipeline
 import os
 import pandas as pd
 
-from src.pre_process.load_ts import load_ts
-from src.pre_process.resample_ts import resample_ts
-from src.pre_process.get_features import get_features
+from load_ts import load_ts
+from resample_ts import resample_ts
+from get_features import get_features
 
 
 def pozo_izquierdo_ts():
@@ -44,8 +44,16 @@ def pozo_izquierdo_ts():
         print('Filename with h = {0} created ...'.format(h))
 
 
-def wind_power_parks():
-    filename = '/Users/tmorales/tmp/RNN-windPower/database/wind_farms/Offshore_WA_OR/windpark_Offshore_WA_OR_turbine_25915.csv'
+def wind_power_parks(filename,**kwargs):
+    
+    if 'step_size' in kwargs.keys():
+        step_size = kwargs['step_size']
+    if 'padding' in kwargs.keys():
+        padding = kwargs['padding']
+    if 'horizon' in kwargs.keys():
+        horizon = kwargs['horizon']
+    if 'window_size' in kwargs.keys():
+        window_size = kwargs['window_size']
 
     # 1.- Load file
     parse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
@@ -68,16 +76,19 @@ def wind_power_parks():
     ts = turbine_25915_wind_H['wind_speed_100m_m/s']
     date = turbine_25915_wind_H.index
 
-    ml_filename = '/Users/tmorales/tmp/RNN-windPower/database/wind_farms/Offshore_WA_OR/Offshore_WA_OR_features'
+    ml_filename = '/tmp/Offshore_WA_OR_features'
 
-    for h in range(1, 25):
-        get_features(ts, date, window_size=6, horizont=h,
+    for h in range(12, 13):
+        get_features(ts, date, window_size=window_size, horizon=h,
                      write_csv_file=True,
-                     filename=ml_filename)
+                     filename=ml_filename,
+                     padding=padding,
+                     step_size=step_size)
         print ('Filename with h = {0} created ...'.format (h))
 
 
 
 if __name__ == "__main__":
     #pozo_izquierdo_ts()
-    wind_power_parks()
+    filename = '/home/ycedres/Projects/PhD/wind/RNN-windPower/database/windpark_Offshore_WA_OR_turbine_25915.csv'
+    wind_power_parks(filename=filename)
