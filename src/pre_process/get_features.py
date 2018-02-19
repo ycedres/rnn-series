@@ -64,7 +64,7 @@ def get_features(ts, date=None, window_size=10, horizon=1, padding=0,
 
     if write_csv_file is True:
         df.to_csv('{0}_h_{1:0=2d}.csv'.format(filename, horizon),
-                  sep=';', float_format='%.2f', index=False)
+                  sep=';', float_format='%.2f', index=True)
 
     print(df.shape)
     print(df.head())

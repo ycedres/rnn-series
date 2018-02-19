@@ -45,7 +45,7 @@ def pozo_izquierdo_ts():
 
 
 def wind_power_parks(filename,**kwargs):
-    
+
     if 'step_size' in kwargs.keys():
         step_size = kwargs['step_size']
     if 'padding' in kwargs.keys():
@@ -74,6 +74,10 @@ def wind_power_parks(filename,**kwargs):
 
     # -- 4.- Generation of features for ML and ANN algorithms.
     ts = turbine_25915_wind_H['wind_speed_100m_m/s']
+    # print("######################## TIME SERIE ORIGINAL")
+    # print(type(ts))
+    # print(ts[0:50])
+    # print("########################")
     date = turbine_25915_wind_H.index
 
     ml_filename = '/tmp/Offshore_WA_OR_features'
@@ -90,5 +94,7 @@ def wind_power_parks(filename,**kwargs):
 
 if __name__ == "__main__":
     #pozo_izquierdo_ts()
-    filename = '/home/ycedres/Projects/PhD/wind/RNN-windPower/database/windpark_Offshore_WA_OR_turbine_25915.csv'
-    wind_power_parks(filename=filename)
+    base_dir = '/home/ycedres/Projects/RNN/RNN-windPower/database/'
+    filename = 'windpark_Offshore_WA_OR_turbine_25915.csv'
+    wind_power_parks(filename=base_dir+filename,window_size=10,horizon=12,
+                               padding=0,step_size=10)
