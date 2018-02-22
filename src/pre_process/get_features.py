@@ -5,7 +5,8 @@ import datetime
 import math
 
 def get_features(ts, date=None, window_size=10, horizon=1, padding=0,
-                 write_csv_file=False, filename=None,step_size=1):
+                 filename=None,step_size=1,write_csv_file=False,
+                 output_csv_file=None):
     """
 
     :param ts:
@@ -61,11 +62,11 @@ def get_features(ts, date=None, window_size=10, horizon=1, padding=0,
     df = pd.concat([df_features, df_target], axis=1)
 
     df.index = df_index
+    df.index.name = 'date'
 
     if write_csv_file is True:
-        df.to_csv('{0}_h_{1:0=2d}.csv'.format(filename, horizon),
-                  sep=';', float_format='%.2f', index=True)
+        # df.to_csv('{0}_h_{1:0=2d}.csv'.format(filename, horizon),
+        #           sep=';', float_format='%.2f', index=True)
+        df.to_csv(output_csv_file)
 
-    print(df.shape)
-    print(df.head())
     return df

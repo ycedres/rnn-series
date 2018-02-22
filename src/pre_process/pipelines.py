@@ -46,14 +46,24 @@ def pozo_izquierdo_ts():
 
 def wind_power_parks(filename,**kwargs):
 
-    if 'step_size' in kwargs.keys():
-        step_size = kwargs['step_size']
-    if 'padding' in kwargs.keys():
-        padding = kwargs['padding']
-    if 'horizon' in kwargs.keys():
-        horizon = kwargs['horizon']
+    # Parameters for get_features
     if 'window_size' in kwargs.keys():
         window_size = kwargs['window_size']
+    if 'horizon' in kwargs.keys():
+        horizon = kwargs['horizon']
+    if 'padding' in kwargs.keys():
+        padding = kwargs['padding']
+    if 'step_size' in kwargs.keys():
+        step_size = kwargs['step_size']
+
+    if 'write_csv_file' in kwargs.keys():
+        write_csv_file = kwargs['write_csv_file']
+    else:
+        write_csv_file = False
+    if 'output_csv_file' in kwargs.keys():
+        output_csv_file = kwargs['output_csv_file']
+    else:
+        output_csv_file = None
 
     # 1.- Load file
     parse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
@@ -80,15 +90,22 @@ def wind_power_parks(filename,**kwargs):
     # print("########################")
     date = turbine_25915_wind_H.index
 
-    ml_filename = '/tmp/Offshore_WA_OR_features'
+    # for h in range(12, 13):
+    #     get_features(ts, date, window_size=window_size, horizon=h,
+    #                  write_csv_file=True,
+    #                  filename=ml_filename,
+    #                  padding=padding,
+    #                  step_size=step_size)
 
-    for h in range(12, 13):
-        get_features(ts, date, window_size=window_size, horizon=h,
-                     write_csv_file=True,
-                     filename=ml_filename,
-                     padding=padding,
-                     step_size=step_size)
-        print ('Filename with h = {0} created ...'.format (h))
+    df = get_features(ts, date, window_size=window_size, horizon=horizon,
+                 padding=padding,
+                 step_size=step_size,
+                 write_csv_file=write_csv_file,
+                 output_csv_file=output_csv_file)
+
+    print ('Filename with h = {0} created ...'.format (horizon))
+
+    return(df)
 
 
 
@@ -96,5 +113,8 @@ if __name__ == "__main__":
     #pozo_izquierdo_ts()
     base_dir = '/home/ycedres/Projects/RNN/RNN-windPower/database/'
     filename = 'windpark_Offshore_WA_OR_turbine_25915.csv'
-    wind_power_parks(filename=base_dir+filename,window_size=10,horizon=12,
-                               padding=0,step_size=10)
+
+    df = wind_power_parks(filename=base_dir+filename,window_size=10,horizon=12,
+                               padding=0,step_size=10,
+                               write_csv_file=True,
+                               output_csv_file='/tmp/output_csv_file.csv')
