@@ -65,6 +65,9 @@ def wind_power_parks(filename,**kwargs):
     else:
         output_csv_file = None
 
+    if 'method' in kwargs.keys():
+        method = kwargs['method']
+
     # 1.- Load file
     parse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
     turbine_25915 = pd.read_csv(filename,
@@ -101,7 +104,8 @@ def wind_power_parks(filename,**kwargs):
                  padding=padding,
                  step_size=step_size,
                  write_csv_file=write_csv_file,
-                 output_csv_file=output_csv_file)
+                 output_csv_file=output_csv_file,
+                 method=method)
 
     print ('Filename with h = {0} created ...'.format (horizon))
 
@@ -117,4 +121,5 @@ if __name__ == "__main__":
     df = wind_power_parks(filename=base_dir+filename,window_size=10,horizon=12,
                                padding=0,step_size=10,
                                write_csv_file=True,
-                               output_csv_file='/tmp/output_csv_file.csv')
+                               output_csv_file='/tmp/output_csv_file.csv',
+                               method='sequential')
