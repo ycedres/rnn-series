@@ -10,10 +10,30 @@ def get_features(ts,date,**kwargs):
         method = kwargs['method']
         del kwargs['method']
 
+    df = pd.DataFrame()
+
     if method == 'sequential':
-        get_features_sequential(ts,date,**kwargs)
+        df = get_features_sequential(ts,date,**kwargs)
     if method == 'daily':
-        get_features_daily(ts,date,**kwargs)
+        df = get_features_daily(ts,date,**kwargs)
+
+
+
+    if 'write_csv_file' in kwargs.keys():
+        write_csv_file = kwargs['write_csv_file']
+    else:
+        write_csv_file = False
+    if 'output_csv_file' in kwargs.keys():
+        output_csv_file = kwargs['output_csv_file']
+    else:
+        output_csv_file = None
+
+    if write_csv_file is True:
+        # df.to_csv('{0}_h_{1:0=2d}.csv'.format(filename, horizon),
+        #           sep=';', float_format='%.2f', index=True)
+        df.to_csv(output_csv_file,sep=';')
+
+    return df
 
 def get_features_sequential(ts, date=None, window_size=10, horizon=1, padding=0,
                  filename=None,step_size=1,write_csv_file=False,
@@ -41,8 +61,9 @@ def get_features_sequential(ts, date=None, window_size=10, horizon=1, padding=0,
 
     upper_bound = len(ts) - (window_size + horizon + padding - 1)
     lower_bound = padding
-    steps = math.ceil(upper_bound/step_size)
+    steps = math.ceil((upper_bound-lower_bound)/step_size)
     print("#################################################")
+    print("SEQUENTIAL")
     print("len(ts): {}".format(len(ts)))
     print("window size: {}".format(window_size))
     print("padding: {}".format(padding))
@@ -75,11 +96,6 @@ def get_features_sequential(ts, date=None, window_size=10, horizon=1, padding=0,
     df.index = df_index
     df.index.name = 'date'
 
-    if write_csv_file is True:
-        # df.to_csv('{0}_h_{1:0=2d}.csv'.format(filename, horizon),
-        #           sep=';', float_format='%.2f', index=True)
-        df.to_csv(output_csv_file)
-
     return df
 
 
@@ -107,10 +123,11 @@ def get_features_daily(ts, date=None, window_size=10, horizon=1, padding=0,
     if date is not None:
         ts = ts.ix[date]
 
-    upper_bound = len(ts) - (window_size + horizon + 24 + padding - 1)
-    lower_bound = padding
-    steps = math.ceil(upper_bound/step_size)
+    upper_bound = len(ts) - (window_size + horizon + padding - 1)
+    lower_bound = window_size*24 + padding
+    steps = math.ceil((upper_bound-lower_bound)/step_size)
     print("#################################################")
+    print("DAILY")
     print("len(ts): {}".format(len(ts)))
     print("window size: {}".format(window_size))
     print("padding: {}".format(padding))
@@ -146,10 +163,5 @@ def get_features_daily(ts, date=None, window_size=10, horizon=1, padding=0,
 
     df.index = df_index
     df.index.name = 'date'
-
-    if write_csv_file is True:
-        # df.to_csv('{0}_h_{1:0=2d}.csv'.format(filename, horizon),
-        #           sep=';', float_format='%.2f', index=True)
-        df.to_csv(output_csv_file)
 
     return df

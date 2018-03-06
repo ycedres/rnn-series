@@ -87,6 +87,7 @@ def wind_power_parks(filename,**kwargs):
 
     # -- 4.- Generation of features for ML and ANN algorithms.
     ts = turbine_25915_wind_H['wind_speed_100m_m/s']
+    
     # print("######################## TIME SERIE ORIGINAL")
     # print(type(ts))
     # print(ts[0:50])
@@ -107,8 +108,6 @@ def wind_power_parks(filename,**kwargs):
                  output_csv_file=output_csv_file,
                  method=method)
 
-    print ('Filename with h = {0} created ...'.format (horizon))
-
     return(df)
 
 
@@ -119,7 +118,8 @@ if __name__ == "__main__":
     filename = 'windpark_Offshore_WA_OR_turbine_25915.csv'
 
     df = wind_power_parks(filename=base_dir+filename,window_size=10,horizon=12,
-                               padding=0,step_size=10,
+                               padding=0,step_size=1,
                                write_csv_file=True,
                                output_csv_file='/tmp/output_csv_file.csv',
-                               method='sequential')
+                               #method='sequential')
+                               method='daily')
