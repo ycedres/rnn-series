@@ -43,8 +43,31 @@ def pozo_izquierdo_ts():
                             filename=ml_filename)
         print('Filename with h = {0} created ...'.format(h))
 
+def wind_power_parks_ts(filename):
 
-def wind_power_parks(filename,**kwargs):
+    # 1.- Load file
+    parse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
+    turbine_25915 = pd.read_csv(filename,
+                                 sep=';',
+                                 parse_dates=['Date(YYYY-MM-DD hh:mm:ss)'],
+                                 date_parser=parse,
+                                 index_col=0)
+    turbine_25915.index.names = ['date']
+    turbine_25915 = turbine_25915.rename(columns={'100m wind speed (m/s)': 'wind_speed_100m_m/s',
+                                                   ' rated power output at 100m (MW)': 'rated_power_output_100m_MW',
+                                                   ' SCORE-lite power output at 100m (MW)': 'SCORE-lite_power_100m_MW',
+                                                   'CorrectedScore': 'Corrected_Score'})
+
+    # 3.- Resample the ts
+    turbine_25915_wind = turbine_25915[['wind_speed_100m_m/s']]
+    turbine_25915_wind_H = resample_ts(turbine_25915_wind, interval='H', operation='mean')
+
+    # -- 4.- Generation of features for ML and ANN algorithms.
+    ts = turbine_25915_wind_H['wind_speed_100m_m/s']
+
+    return ts
+
+def wind_power_parks_features(filename,**kwargs):
 
     # Parameters for get_features
     if 'window_size' in kwargs.keys():
@@ -68,31 +91,14 @@ def wind_power_parks(filename,**kwargs):
     if 'method' in kwargs.keys():
         method = kwargs['method']
 
-    # 1.- Load file
-    parse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
-    turbine_25915 = pd.read_csv(filename,
-                                 sep=';',
-                                 parse_dates=['Date(YYYY-MM-DD hh:mm:ss)'],
-                                 date_parser=parse,
-                                 index_col=0)
-    turbine_25915.index.names = ['date']
-    turbine_25915 = turbine_25915.rename(columns={'100m wind speed (m/s)': 'wind_speed_100m_m/s',
-                                                   ' rated power output at 100m (MW)': 'rated_power_output_100m_MW',
-                                                   ' SCORE-lite power output at 100m (MW)': 'SCORE-lite_power_100m_MW',
-                                                   'CorrectedScore': 'Corrected_Score'})
 
-    # 3.- Resample the ts
-    turbine_25915_wind = turbine_25915[['wind_speed_100m_m/s']]
-    turbine_25915_wind_H = resample_ts(turbine_25915_wind, interval='H', operation='mean')
+    ts = wind_power_parks_ts(filename)
 
-    # -- 4.- Generation of features for ML and ANN algorithms.
-    ts = turbine_25915_wind_H['wind_speed_100m_m/s']
-    
     # print("######################## TIME SERIE ORIGINAL")
     # print(type(ts))
     # print(ts[0:50])
     # print("########################")
-    date = turbine_25915_wind_H.index
+    date = ts.index
 
     # for h in range(12, 13):
     #     get_features(ts, date, window_size=window_size, horizon=h,
@@ -114,10 +120,11 @@ def wind_power_parks(filename,**kwargs):
 
 if __name__ == "__main__":
     #pozo_izquierdo_ts()
-    base_dir = '/home/ycedres/Projects/RNN/RNN-windPower/database/'
+    base_dir = '/home/ycedres/Projects/PhD/wind/RNN-windPower/database/'
     filename = 'windpark_Offshore_WA_OR_turbine_25915.csv'
 
-    df = wind_power_parks(filename=base_dir+filename,window_size=10,horizon=12,
+    df = wind_power_parks_features(filename=base_dir+filename,window_size=10,
+                               horizon=12,
                                padding=0,step_size=1,
                                write_csv_file=True,
                                output_csv_file='/tmp/output_csv_file.csv',

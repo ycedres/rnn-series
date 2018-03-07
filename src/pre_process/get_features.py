@@ -143,14 +143,17 @@ def get_features_daily(ts, date=None, window_size=10, horizon=1, padding=0,
     df_index = np.zeros(steps,dtype=datetime.datetime)
 
     i = 0
-    delta_ws_days= pd.Timedelta('1 days'*window_size)
+    delta_horizon = pd.Timedelta('{} hours'.format(horizon))
+    delta_ws_days= pd.Timedelta('1 days'*(window_size-1))
     for t in range(lower_bound, upper_bound,step_size):
         df_index[i]=ts.index[t].to_pydatetime()
         daily_window_start = ts.index[t]-delta_ws_days
         daily_window_indexes = pd.date_range(daily_window_start,
                                              periods=window_size,freq='D')
+        
         features[i][0: window_size] = ts[daily_window_indexes]
-        h_offset = t + window_size + horizon - 1
+        h_offset = ts.index[t] + delta_horizon
+
         labels[i] = ts[h_offset]
         i += 1
 
