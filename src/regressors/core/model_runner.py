@@ -2,6 +2,7 @@ import sys
 sys.path.insert(0, '../')
 
 from crossvalidation.csv_input_manager import CSVInputManager
+from input_manager import NRELInputManager
 from models.ml.KNNRegressor import KNNRegressor
 from models.ml.DecisionTreeRegressor import RDecisionTree
 from crossvalidation.train_test_split import TrainTestSplit
@@ -97,6 +98,9 @@ class FileConfigManager(ConfigManager):
     def get_operation_config(self):
         pass
 
+    def get_features_config(self):
+        return dict(config.items('features'))
+
     #Returns {'knn':{(opt1,val1),(opt2,val2)},'lstm':{(opt1,val1),(opt2,val2)}}
     def get_model_config(self,name):
         config = {model[0]:self._config.items(model[0]) for model in self._config.items('models') if model[1]=='true'}
@@ -146,6 +150,9 @@ class Experiment(object):
 
     # INPUT
 
+    def get_features_target(self):
+        return self._input_manager.get_features()
+
     def read_data(self):
         return self._input_manager.get_data()
 
@@ -164,7 +171,7 @@ class Experiment(object):
     # RUNNER
     def run_operation(self, operation):
         # self._output = operation.run(self.read_input())
-        self._output = operation.run(self.read_dataframe())
+        self._output = operation.run(self.get_features_target())
 
     # OUTPUT
     def save_output(self):
@@ -179,9 +186,11 @@ class Experiment(object):
 
 if __name__ == "__main__":
 
-    file_config_manager = FileConfigManager(filename='config.ini')
+    config_file_name = '/home/ycedres/Projects/RNN/RNN-windPower/src/regressors/core/config.ini'
+    file_config_manager = FileConfigManager(filename=config_file_name)
     filename = file_config_manager.get_input_filename()
-    input_manager = CSVInputManager(filename=filename, delimiter=';')
+
+    #input_manager = CSVInputManager(filename=filename, delimiter=';')
     output_manager = OutputManager()
     local_runner = LocalRunner()
 
@@ -200,9 +209,12 @@ if __name__ == "__main__":
     # experiment_knr.print_output()
 
     # DTR
-    df_input_manager = CSVInputManager(filename=filename, delimiter=';')
+    #df_input_manager = CSVInputManager(filename=filename, delimiter=';')
+
+    input_manager = NRELInputManager()
+
     experiment_dtr = Experiment(config_manager=file_config_manager,
-                                input_manager=df_input_manager,
+                                input_manager=input_manager,
                                 output_manager=output_manager,
                                 runner=local_runner)
 
