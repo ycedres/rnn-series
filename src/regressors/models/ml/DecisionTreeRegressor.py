@@ -23,10 +23,10 @@ class RDecisionTree(object):
             evaluate_train = self._dtr.predict(features_train_set)
             evaluate_validation = self._dtr.predict(features_validation_set)
             # metric calculation
-            mse_train = mean_squared_error(target_train_set[['target']].values,
+            mse_train = mean_squared_error(target_train_set.values,
                                            evaluate_train)
             mse_validation = mean_absolute_error(
-                target_validation_set[['target']].values,
+                target_validation_set.values,
                 evaluate_validation)
             mse.append(mse_train)
             val_mse.append(mse_validation)

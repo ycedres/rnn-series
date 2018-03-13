@@ -9,14 +9,47 @@ Data Engineering Pipeline
 import os
 import pandas as pd
 
-from input_manager import InputManager
+from input_manager.input_manager import InputManager
 
 class NRELInputManager(InputManager):
 
     def NRELInputManager(self,method=None,**kwargs):
         #TODO Parámentros: parque, turbina, rango temporal...
         #Fuente: parámetros de conexión, ruta fichero...
+        self._ts = None
         pass
+
+    def configure_datasource(self,method,**kwargs):
+
+        if method=='filesystem':
+            if 'filename' in kwargs.keys():
+                self._ts = self.get_ts(filename=kwargs['filename'])
+
+
+
+    def configure_generator(self,**kwargs):
+
+        if 'window_size' in kwargs.keys():
+            self._window_size = kwargs['window_size']
+        if 'horizon' in kwargs.keys():
+            self._horizon = kwargs['horizon']
+        if 'padding' in kwargs.keys():
+            self._padding = kwargs['padding']
+        if 'step_size' in kwargs.keys():
+            self._step_size = kwargs['step_size']
+
+        if 'write_csv_file' in kwargs.keys():
+            self._write_csv_file = kwargs['write_csv_file']
+        else:
+            write_csv_file = False
+        if 'output_csv_file' in kwargs.keys():
+            self._output_csv_file = kwargs['output_csv_file']
+        else:
+            self._output_csv_file = None
+
+        if 'method' in kwargs.keys():
+            self._method = kwargs['method']
+
 
     def read_input_features(self):
         return self._input_manager.load_data()
@@ -49,38 +82,16 @@ class NRELInputManager(InputManager):
         return ts
 
 
-    def get_features_target(self,filename,**kwargs):
-
-        # Parameters for get_features
-        if 'window_size' in kwargs.keys():
-            window_size = kwargs['window_size']
-        if 'horizon' in kwargs.keys():
-            horizon = kwargs['horizon']
-        if 'padding' in kwargs.keys():
-            padding = kwargs['padding']
-        if 'step_size' in kwargs.keys():
-            step_size = kwargs['step_size']
-
-        if 'write_csv_file' in kwargs.keys():
-            write_csv_file = kwargs['write_csv_file']
-        else:
-            write_csv_file = False
-        if 'output_csv_file' in kwargs.keys():
-            output_csv_file = kwargs['output_csv_file']
-        else:
-            output_csv_file = None
-
-        if 'method' in kwargs.keys():
-            method = kwargs['method']
+    def get_features_target(self):
 
 
-        ts = self.get_ts(filename)
+        #ts = self.get_ts(filename)
 
         # print("######################## TIME SERIE ORIGINAL")
         # print(type(ts))
         # print(ts[0:50])
         # print("########################")
-        date = ts.index
+        date = self._ts.index
 
         # for h in range(12, 13):
         #     get_features(ts, date, window_size=window_size, horizon=h,
@@ -89,12 +100,14 @@ class NRELInputManager(InputManager):
         #                  padding=padding,
         #                  step_size=step_size)
 
-        df = self.get_features(ts, date, window_size=window_size, horizon=horizon,
-                     padding=padding,
-                     step_size=step_size,
-                     write_csv_file=write_csv_file,
-                     output_csv_file=output_csv_file,
-                     method=method)
+        df = self.get_features(self._ts, date,
+                     window_size=self._window_size,
+                     horizon=self._horizon,
+                     padding=self._padding,
+                     step_size=self._step_size,
+                     write_csv_file=self._write_csv_file,
+                     output_csv_file=self._output_csv_file,
+                     method=self._method)
 
         return df
 
@@ -106,10 +119,17 @@ if __name__ == "__main__":
 
     im = NRELInputManager()
 
-    df = im.get_features_target(filename=base_dir+filename,window_size=10,
-                               horizon=12,
-                               padding=0,step_size=1,
-                               write_csv_file=True,
-                               output_csv_file='/tmp/output_csv_file.csv',
-                               #method='sequential')
-                               method='daily')
+    im.configure_datasource(method='filesystem',filename=base_dir+filename)
+
+    im.configure_generator(
+        window_size=10,
+        horizon=12,
+        padding=0,
+        step_size=1,
+        write_csv_file=True,
+        output_csv_file='/tmp/output_csv_file.csv',
+        #method='sequential',
+        method='daily'
+    )
+
+    df = im.get_features_target()

@@ -2,7 +2,7 @@ import sys
 sys.path.insert(0, '../')
 
 from crossvalidation.csv_input_manager import CSVInputManager
-from input_manager import NRELInputManager
+from input_manager.nrel_input_manager import NRELInputManager
 from models.ml.KNNRegressor import KNNRegressor
 from models.ml.DecisionTreeRegressor import RDecisionTree
 from crossvalidation.train_test_split import TrainTestSplit
@@ -58,6 +58,8 @@ class TrainOperation(Operation):
         tts = TrainTestSplit(df=data)
         tts.dataframe_split()
         #self._model.train(data['training_data'], data['testing_data'])
+
+        print(tts.get_features())
         self._model.train(tts.get_features(), tts.get_target(), tts.get_validation(),tts.get_target_validation())
 
 
@@ -151,7 +153,7 @@ class Experiment(object):
     # INPUT
 
     def get_features_target(self):
-        return self._input_manager.get_features()
+        return self._input_manager.get_features_target()
 
     def read_data(self):
         return self._input_manager.get_data()
@@ -212,6 +214,22 @@ if __name__ == "__main__":
     #df_input_manager = CSVInputManager(filename=filename, delimiter=';')
 
     input_manager = NRELInputManager()
+
+    base_dir = '/home/ycedres/Projects/RNN/RNN-windPower/database/'
+    filename = 'windpark_Offshore_WA_OR_turbine_25915.csv'
+    input_manager.configure_datasource(method='filesystem',
+    filename=base_dir+filename)
+
+    input_manager.configure_generator(
+        window_size=10,
+        horizon=12,
+        padding=0,
+        step_size=1,
+        write_csv_file=True,
+        output_csv_file='/tmp/output_csv_file.csv',
+        #method='sequential',
+        method='daily'
+    )
 
     experiment_dtr = Experiment(config_manager=file_config_manager,
                                 input_manager=input_manager,
