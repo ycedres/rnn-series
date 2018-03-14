@@ -19,7 +19,7 @@ class NRELInputManager(InputManager):
         self._ts = None
         pass
 
-    def configure_datasource(self,method,**kwargs):
+    def configure_load_datasource(self,method,**kwargs):
 
         if method=='filesystem':
             if 'filename' in kwargs.keys():
@@ -27,7 +27,7 @@ class NRELInputManager(InputManager):
 
 
 
-    def configure_generator(self,**kwargs):
+    def configure_features_generator(self,**kwargs):
 
         if 'window_size' in kwargs.keys():
             self._window_size = kwargs['window_size']
@@ -82,7 +82,7 @@ class NRELInputManager(InputManager):
         return ts
 
 
-    def get_features_target(self):
+    def load_and_split(self):
 
 
         #ts = self.get_ts(filename)
@@ -100,7 +100,7 @@ class NRELInputManager(InputManager):
         #                  padding=padding,
         #                  step_size=step_size)
 
-        df = self.get_features(self._ts, date,
+        self._df = self.get_features(self._ts, date,
                      window_size=self._window_size,
                      horizon=self._horizon,
                      padding=self._padding,
@@ -109,8 +109,9 @@ class NRELInputManager(InputManager):
                      output_csv_file=self._output_csv_file,
                      method=self._method)
 
-        return df
 
+    def get_features_target(self):
+        return self._df
 
 if __name__ == "__main__":
     #pozo_izquierdo_ts()
@@ -119,9 +120,9 @@ if __name__ == "__main__":
 
     im = NRELInputManager()
 
-    im.configure_datasource(method='filesystem',filename=base_dir+filename)
+    im.configure_load_datasource(method='filesystem',filename=base_dir+filename)
 
-    im.configure_generator(
+    im.configure_features_generator(
         window_size=10,
         horizon=12,
         padding=0,
@@ -132,4 +133,6 @@ if __name__ == "__main__":
         method='daily'
     )
 
-    df = im.get_features_target()
+    im.load_and_split()
+
+    print(im.get_test_features())
