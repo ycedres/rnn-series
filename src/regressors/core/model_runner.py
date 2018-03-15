@@ -5,10 +5,13 @@ from crossvalidation.csv_input_manager import CSVInputManager
 from input_manager.nrel_input_manager import NRELInputManager
 from models.ml.KNNRegressor import KNNRegressor
 from models.ml.DecisionTreeRegressor import RDecisionTree
+from models.ml.RSupportVector import RSupportVector
 from crossvalidation.train_test_split import TrainTestSplit
 # from models.neural_networks.svr.SVR import SVRRegresion
 import matplotlib.pyplot as plt
+plt.style.use('ggplot')
 from configparser import ConfigParser
+import pandas as pd
 # Models == Receivers
 
 
@@ -145,6 +148,15 @@ class OutputManager(object):
         ax.scatter(x,y)
         plt.show()
 
+    def plot(self,x,y):
+        x = pd.DataFrame(x)
+        x.index = y.index
+        df = pd.concat([x,y],axis=1)
+
+        df.plot(figsize=(15,5))
+        # plt.plot(x,y)
+        plt.show()
+
 
 
 #/////////////////////////////////////////////////////////////
@@ -205,11 +217,19 @@ class Experiment(object):
     def print_performance(self):
         self._output_manager.print_performance()
 
-    def plot(self):
-        self._output_manager.plot_scatter(
-                             self._output,
-                             self._input_manager.get_test_target()
-                             )
+    def plot(self,type=None):
+        if type=='scatter':
+            self._output_manager.plot_scatter(
+                                 self._output,
+                                 self._input_manager.get_test_target()
+                                 )
+        else:
+            self._output_manager.plot(
+                                 self._output,
+                                 self._input_manager.get_test_target()
+            )
+
+
 
 
 if __name__ == "__main__":
@@ -247,31 +267,46 @@ if __name__ == "__main__":
     filename=base_dir+filename)
 
     input_manager.configure_features_generator(
-        window_size=10,
-        horizon=12,
+        window_size=5,
+        horizon=1,
         padding=0,
         step_size=1,
         write_csv_file=True,
         output_csv_file='/tmp/output_csv_file.csv',
-        #method='sequential',
-        method='daily'
+        method='sequential',
+        #method='daily'
     )
 
     input_manager.load_and_split()
 
-    experiment_dtr = Experiment(config_manager=file_config_manager,
+    # experiment_dtr = Experiment(config_manager=file_config_manager,
+    #                             input_manager=input_manager,
+    #                             output_manager=output_manager,
+    #                             runner=local_runner)
+    #
+    # dtr = RDecisionTree(file_config_manager.
+    #                     get_model_config(name='dtr'))
+    #
+    # dtr_train_operation = TrainOperation(dtr)
+    # experiment_dtr.run_train_operation(dtr_train_operation)
+    #
+    # dtr_test_operation = TestOperation(dtr)
+    # result = experiment_dtr.run_test_operation(dtr_test_operation)
+    # #experiment_dtr.print_output()
+    #
+    # experiment_dtr.plot()
+
+
+    experiment_svr = Experiment(config_manager=file_config_manager,
                                 input_manager=input_manager,
                                 output_manager=output_manager,
                                 runner=local_runner)
 
-    dtr = RDecisionTree(file_config_manager.
-                        get_model_config(name='dtr'))
+    svr = RSupportVector()
+    svr_train_operation = TrainOperation(svr)
+    experiment_svr.run_train_operation(svr_train_operation)
 
-    dtr_train_operation = TrainOperation(dtr)
-    experiment_dtr.run_train_operation(dtr_train_operation)
+    svr_test_operation = TestOperation(svr)
+    result = experiment_svr.run_test_operation(svr_test_operation)
 
-    dtr_test_operation = TestOperation(dtr)
-    result = experiment_dtr.run_test_operation(dtr_test_operation)
-    #experiment_dtr.print_output()
-
-    experiment_dtr.plot()
+    experiment_svr.plot()
