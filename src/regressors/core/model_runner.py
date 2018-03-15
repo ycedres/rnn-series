@@ -148,6 +148,33 @@ class OutputManager(object):
         ax.scatter(x,y)
         plt.show()
 
+    def plot_scatter_df(self,x,y):
+
+        df_x = pd.DataFrame(x)
+        df_x.index = y.index
+        df = pd.concat([df_x,y],axis=1)
+        df.columns = ['a','b']
+
+        print(df)
+        f, ax = plt.subplots(1,1,figsize=(10,10))
+        x_min = x.min()
+        x_max = x.max()
+        y_min = y.min()
+        y_max = y.max()
+        ax.set_xlim(x_min+1, x_max+1)
+        ax.set_ylim(x_min+1, x_max+1)
+        ax.plot((x_min, x_max), (x_min, x_max), lw=3, c='r')
+        ax.scatter(x,y)
+        #plt.figure()
+        df.plot(ax=ax,
+                x='a',
+                y='b',
+                kind='scatter',
+                )
+        plt.show()
+
+
+
     def plot(self,x,y):
         x = pd.DataFrame(x)
         x.index = y.index
@@ -219,7 +246,7 @@ class Experiment(object):
 
     def plot(self,type=None):
         if type=='scatter':
-            self._output_manager.plot_scatter(
+            self._output_manager.plot_scatter_df(
                                  self._output,
                                  self._input_manager.get_test_target()
                                  )
@@ -309,4 +336,6 @@ if __name__ == "__main__":
     svr_test_operation = TestOperation(svr)
     result = experiment_svr.run_test_operation(svr_test_operation)
 
+    experiment_svr.plot(type='scatter')
+    
     experiment_svr.plot()
