@@ -96,6 +96,9 @@ class FileConfigManager(ConfigManager):
     def get_input_basedir(self):
         return self._config.get('data', 'basedir')
 
+    def get_output_basedir(self):
+        return self._config.get('data', 'output_basedir')
+
     def get_input_filename(self):
         return self._config.get('data', 'filename')
 
@@ -104,7 +107,7 @@ class FileConfigManager(ConfigManager):
         pass
 
     def get_features_config(self):
-        return dict(config.items('features'))
+        return dict(self._config.items('features'))
 
     #Returns {'knn':{(opt1,val1),(opt2,val2)},'lstm':{(opt1,val1),(opt2,val2)}}
     def get_model_config(self,name):
@@ -275,16 +278,27 @@ if __name__ == "__main__":
     input_manager.configure_load_datasource(method='filesystem',
     filename=basedir+filename)
 
+    features = file_config_manager.get_features_config()
+    print(features)
+    # import sys
+    # sys.exit()
+    output_filename = 'ws'+features['window_size'] + '_' + \
+                      'h'+features['horizon'] + '_' + \
+                      'p'+features['padding'] + '_' + \
+                      'sz'+features['step_size'] + '_' + \
+                      features['method'] +\
+                      '.csv'
 
     input_manager.configure_features_generator(
-        window_size=5,
-        horizon=1,
-        padding=0,
-        step_size=1,
+        window_size=int(features['window_size']),
+        horizon=int(features['horizon']),
+        padding=int(features['padding']),
+        step_size=int(features['step_size']),
         write_csv_file=True,
-        output_csv_file='/tmp/output_csv_file.csv',
+        output_csv_file=file_config_manager.get_output_basedir()+
+                        output_filename,
         #method='sequential',
-        method='daily'
+        method=features['method']
     )
 
     input_manager.load_and_split()
