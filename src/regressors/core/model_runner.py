@@ -93,6 +93,9 @@ class FileConfigManager(ConfigManager):
         self._config = ConfigParser()
         self._config.read(filename)
 
+    def get_input_basedir(self):
+        return self._config.get('data', 'basedir')
+
     def get_input_filename(self):
         return self._config.get('data', 'filename')
 
@@ -149,13 +152,11 @@ class OutputManager(object):
         plt.show()
 
     def plot_scatter_df(self,x,y):
-
         df_x = pd.DataFrame(x)
         df_x.index = y.index
         df = pd.concat([df_x,y],axis=1)
         df.columns = ['a','b']
 
-        print(df)
         f, ax = plt.subplots(1,1,figsize=(10,10))
         x_min = x.min()
         x_max = x.max()
@@ -171,7 +172,7 @@ class OutputManager(object):
                 y='b',
                 kind='scatter',
                 )
-        plt.show()
+        plt.show(block=False)
 
 
 
@@ -182,7 +183,7 @@ class OutputManager(object):
 
         df.plot(figsize=(15,5))
         # plt.plot(x,y)
-        plt.show()
+        plt.show(block=False)
 
 
 
@@ -262,36 +263,18 @@ class Experiment(object):
 if __name__ == "__main__":
 
     config_file_name = '/home/ycedres/Projects/RNN/RNN-windPower/src/regressors/core/config.ini'
+
     file_config_manager = FileConfigManager(filename=config_file_name)
+    basedir = file_config_manager.get_input_basedir()
     filename = file_config_manager.get_input_filename()
 
-    #input_manager = CSVInputManager(filename=filename, delimiter=';')
     output_manager = OutputManager()
     local_runner = LocalRunner()
 
-    # experiment_knr = Experiment(config_manager=file_config_manager,
-    #                             input_manager=input_manager,
-    #                             output_manager=output_manager,
-    #                             runner=local_runner)
-
-    # Invoker
-    # knr = KNNRegressor(file_config_manager.get_model_config(name='knr'))
-    # knr_train_operation = TrainOperation(knr)
-    # knr_test_operation = TestOperation(knr)
-    #
-    # experiment_knr.run_operation(knr_train_operation)
-    # experiment_knr.run_operation(knr_test_operation)
-    # experiment_knr.print_output()
-
-    # DTR
-    #df_input_manager = CSVInputManager(filename=filename, delimiter=';')
-
     input_manager = NRELInputManager()
-
-    base_dir = '/home/ycedres/Projects/RNN/RNN-windPower/database/'
-    filename = 'windpark_Offshore_WA_OR_turbine_25915.csv'
     input_manager.configure_load_datasource(method='filesystem',
-    filename=base_dir+filename)
+    filename=basedir+filename)
+
 
     input_manager.configure_features_generator(
         window_size=5,
@@ -300,8 +283,8 @@ if __name__ == "__main__":
         step_size=1,
         write_csv_file=True,
         output_csv_file='/tmp/output_csv_file.csv',
-        method='sequential',
-        #method='daily'
+        #method='sequential',
+        method='daily'
     )
 
     input_manager.load_and_split()
@@ -337,5 +320,9 @@ if __name__ == "__main__":
     result = experiment_svr.run_test_operation(svr_test_operation)
 
     experiment_svr.plot(type='scatter')
-    
+
     experiment_svr.plot()
+
+    #####
+    # Esto es para que se muestren los gráficos en modo no bloqueante
+    plt.show()
