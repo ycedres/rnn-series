@@ -44,9 +44,8 @@ class InputManager(object):
             output_csv_file = None
 
         if write_csv_file is True:
-            # df.to_csv('{0}_h_{1:0=2d}.csv'.format(filename, horizon),
-            #           sep=';', float_format='%.2f', index=True)
-            df.to_csv(output_csv_file,sep=';')
+            df.to_csv(output_csv_file, sep=';', float_format='%.2f', index=True)
+            # df.to_csv(output_csv_file,sep=';')
 
         self._df = df
         self.dataframe_split()

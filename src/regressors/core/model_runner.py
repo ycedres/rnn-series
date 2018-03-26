@@ -340,3 +340,6 @@ if __name__ == "__main__":
     #####
     # Esto es para que se muestren los gráficos en modo no bloqueante
     plt.show()
+    import sys
+    sys.exit()
+    
