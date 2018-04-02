@@ -6,6 +6,7 @@ from input_manager.nrel_input_manager import NRELInputManager
 from models.ml.KNNRegressor import KNNRegressor
 from models.ml.DecisionTreeRegressor import RDecisionTree
 from models.ml.RSupportVector import RSupportVector
+from models.ml.RLSTM import RLSTM
 from crossvalidation.train_test_split import TrainTestSplit
 # from models.neural_networks.svr.SVR import SVRRegresion
 import matplotlib.pyplot as plt
@@ -263,23 +264,72 @@ class Experiment(object):
 
 
 
+
+
+
+
 if __name__ == "__main__":
 
+    def exp_svr(config_manager,input_manager,output_manager,runner):
+
+        experiment_svr = Experiment(config_manager=file_config_manager,
+                                    input_manager=input_manager,
+                                    output_manager=output_manager,
+                                    runner=local_runner)
+
+        svr = RSupportVector()
+        svr_train_operation = TrainOperation(svr)
+        experiment_svr.run_train_operation(svr_train_operation)
+
+        svr_test_operation = TestOperation(svr)
+
+        experiment_svr.run_test_operation(svr_test_operation)
+
+        experiment_svr.plot(type='scatter')
+
+        experiment_svr.plot()
+
+    def exp_lstm(config_manager,input_manager,output_manager,runner):
+        experiment_lstm = Experiment(config_manager=file_config_manager,
+                                    input_manager=input_manager,
+                                    output_manager=output_manager,
+                                    runner=local_runner)
+
+        lstm = RLSTM()
+        lstm_train_operation = TrainOperation(lstm)
+        experiment_lstm.run_train_operation(lstm_train_operation)
+
+        lstm_test_operation = TestOperation(lstm)
+
+        experiment_lstm.run_test_operation(lstm_test_operation)
+
+        experiment_lstm.plot(type='scatter')
+
+        experiment_lstm.plot()
+
+
+
+
+    # CONFIGURATION MANAGER
     config_file_name = '/home/ycedres/Projects/RNN/RNN-windPower/src/regressors/core/config.ini'
 
     file_config_manager = FileConfigManager(filename=config_file_name)
     basedir = file_config_manager.get_input_basedir()
     filename = file_config_manager.get_input_filename()
 
+    # OUTPUT MANAGER
     output_manager = OutputManager()
+
+    # RUNNER
     local_runner = LocalRunner()
 
+    # INPUT MANAGER
     input_manager = NRELInputManager()
     input_manager.configure_load_datasource(method='filesystem',
     filename=basedir+filename)
 
     features = file_config_manager.get_features_config()
-    print(features)
+
     # import sys
     # sys.exit()
     output_filename = 'ws'+features['window_size'] + '_' + \
@@ -320,26 +370,28 @@ if __name__ == "__main__":
     #
     # experiment_dtr.plot()
 
-
-    experiment_svr = Experiment(config_manager=file_config_manager,
-                                input_manager=input_manager,
-                                output_manager=output_manager,
-                                runner=local_runner)
-
-    svr = RSupportVector()
-    svr_train_operation = TrainOperation(svr)
-    experiment_svr.run_train_operation(svr_train_operation)
-
-    svr_test_operation = TestOperation(svr)
-    result = experiment_svr.run_test_operation(svr_test_operation)
-
-    experiment_svr.plot(type='scatter')
-
-    experiment_svr.plot()
+    exp_lstm(config_manager=file_config_manager,
+         input_manager=input_manager,
+         output_manager=output_manager,
+         runner=local_runner)
+    # experiment_svr = Experiment(config_manager=file_config_manager,
+    #                             input_manager=input_manager,
+    #                             output_manager=output_manager,
+    #                             runner=local_runner)
+    #
+    # svr = RSupportVector()
+    # svr_train_operation = TrainOperation(svr)
+    # experiment_svr.run_train_operation(svr_train_operation)
+    #
+    # svr_test_operation = TestOperation(svr)
+    # result = experiment_svr.run_test_operation(svr_test_operation)
+    #
+    # experiment_svr.plot(type='scatter')
+    #
+    # experiment_svr.plot()
 
     #####
     # Esto es para que se muestren los gráficos en modo no bloqueante
     plt.show()
     import sys
     sys.exit()
-    
