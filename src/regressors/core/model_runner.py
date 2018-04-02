@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 plt.style.use('ggplot')
 from configparser import ConfigParser
 import pandas as pd
+import numpy as np
 # Models == Receivers
 
 
@@ -132,6 +133,7 @@ class FileConfigManager(ConfigManager):
 class OutputManager(object):
 
     def __init__(self,output_file=''):
+        self._df_prediction = None
         pass
 
     def save(self,option='file'):
@@ -155,11 +157,13 @@ class OutputManager(object):
         ax.scatter(x,y)
         plt.show()
 
-    def plot_scatter_df(self,x,y):
-        df_x = pd.DataFrame(x)
-        df_x.index = y.index
-        df = pd.concat([df_x,y],axis=1)
-        df.columns = ['a','b']
+    def plot_scatter_df(self):
+        # df_x = pd.DataFrame(x)
+        # df_x.index = y.index
+        # df = pd.concat([df_x,y],axis=1)
+        # df.columns = ['a','b']
+        x = self._df_prediction['prediction']
+        y = self._df_prediction['target']
 
         f, ax = plt.subplots(1,1,figsize=(10,10))
         x_min = x.min()
@@ -171,9 +175,9 @@ class OutputManager(object):
         ax.plot((x_min, x_max), (x_min, x_max), lw=3, c='r')
         ax.scatter(x,y)
         #plt.figure()
-        df.plot(ax=ax,
-                x='a',
-                y='b',
+        self._df_prediction.plot(ax=ax,
+                x='prediction',
+                y='target',
                 kind='scatter',
                 )
         plt.show(block=False)
@@ -188,6 +192,27 @@ class OutputManager(object):
         df.plot(figsize=(15,5))
         # plt.plot(x,y)
         plt.show(block=False)
+
+
+    def set_df_prediction(self,x:np.array,y:pd.DataFrame):
+        df_x = pd.DataFrame(x)
+        df_x.index = y.index
+        self._df_prediction = pd.concat([df_x,y],axis=1)
+        self._df_prediction.columns = ['prediction','target']
+
+
+    def get_test_mae(self):
+        self._df_prediction['mae'] = np.abs(self._df_prediction.prediction -
+                                      self._df_prediction.target)
+        return  self._df_prediction.mae.sum() / len(self._df_prediction.mae)
+
+    def get_test_mse(self):
+        self._df_prediction['mse'] = np.power(self._df_prediction.prediction -
+                                       self._df_prediction.target, 2)
+        return self._df_prediction.mse.sum() / len(self._df_prediction.mse)
+
+
+
 
 
 
@@ -238,6 +263,14 @@ class Experiment(object):
         self._output = operation.run(
             test_features=self._input_manager.get_test_features(),
         )
+        self._output_manager.set_df_prediction(
+                             self._output,
+                             self._input_manager.get_test_target()
+                             )
+
+    def get_error_estimators(self):
+        return {'mse':self._output_manager.get_test_mse(),
+                'mae':self._output_manager.get_test_mae()}
 
     # OUTPUT
     def save_output(self):
@@ -252,14 +285,14 @@ class Experiment(object):
     def plot(self,type=None):
         if type=='scatter':
             self._output_manager.plot_scatter_df(
-                                 self._output,
-                                 self._input_manager.get_test_target()
+
                                  )
         else:
             self._output_manager.plot(
                                  self._output,
                                  self._input_manager.get_test_target()
             )
+
 
 
 
@@ -289,6 +322,8 @@ if __name__ == "__main__":
 
         experiment_svr.plot()
 
+        print(experiment_svr.get_error_estimators())
+
     def exp_lstm(config_manager,input_manager,output_manager,runner):
         experiment_lstm = Experiment(config_manager=file_config_manager,
                                     input_manager=input_manager,
@@ -307,6 +342,7 @@ if __name__ == "__main__":
 
         experiment_lstm.plot()
 
+        print(experiment_lstm.get_error_estimators())
 
 
 
@@ -370,10 +406,12 @@ if __name__ == "__main__":
     #
     # experiment_dtr.plot()
 
-    exp_lstm(config_manager=file_config_manager,
+    exp_svr(config_manager=file_config_manager,
          input_manager=input_manager,
          output_manager=output_manager,
          runner=local_runner)
+
+
     # experiment_svr = Experiment(config_manager=file_config_manager,
     #                             input_manager=input_manager,
     #                             output_manager=output_manager,
