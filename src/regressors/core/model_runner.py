@@ -257,9 +257,19 @@ class OutputManager(object):
                                        self._df_prediction.target, 2)
         return self._df_prediction.mse.sum() / len(self._df_prediction.mse)
 
+    def save_error_estimators(self,d):
 
+        directory = self._basedir + '/' + self._file_prefix + '/'
+        filename = directory + 'errors.json'
 
+        if not os.path.exists(directory):
+            os.makedirs(directory)
 
+        f = open(filename,'w')
+        import json
+        d = json.dumps(d)
+        f.write(d)
+        f.close()
 
 
 #/////////////////////////////////////////////////////////////
@@ -318,6 +328,9 @@ class Experiment(object):
         return {'mse':self._output_manager.get_test_mse(),
                 'mae':self._output_manager.get_test_mae()}
 
+    def save_error_estimators(self):
+        self._output_manager.save_error_estimators(self.get_error_estimators())
+
     # OUTPUT
     def save_output(self):
         self._output_manager.save(self._output)
@@ -343,47 +356,6 @@ class Experiment(object):
 
 if __name__ == "__main__":
 
-    def exp_svr(config_manager,input_manager,output_manager,runner):
-
-        experiment_svr = Experiment(config_manager=file_config_manager,
-                                    input_manager=input_manager,
-                                    output_manager=output_manager,
-                                    runner=local_runner)
-
-        svr = RSupportVector()
-        svr_train_operation = TrainOperation(svr)
-        experiment_svr.run_train_operation(svr_train_operation)
-
-        svr_test_operation = TestOperation(svr)
-
-        experiment_svr.run_test_operation(svr_test_operation)
-
-        experiment_svr.plot(type='scatter')
-
-        experiment_svr.plot()
-
-        print(experiment_svr.get_error_estimators())
-
-    def exp_lstm(config_manager,input_manager,output_manager,runner):
-        experiment_lstm = Experiment(config_manager=file_config_manager,
-                                    input_manager=input_manager,
-                                    output_manager=output_manager,
-                                    runner=local_runner)
-
-        lstm = RLSTM()
-        lstm_train_operation = TrainOperation(lstm)
-        experiment_lstm.run_train_operation(lstm_train_operation)
-
-        lstm_test_operation = TestOperation(lstm)
-
-        experiment_lstm.run_test_operation(lstm_test_operation)
-
-        experiment_lstm.plot(type='scatter')
-
-        experiment_lstm.plot()
-
-        print(experiment_lstm.get_error_estimators())
-
     def launch(regressor,config_manager,input_manager,output_manager,runner):
         experiment = Experiment(config_manager=file_config_manager,
                                     input_manager=input_manager,
@@ -399,8 +371,7 @@ if __name__ == "__main__":
         experiment.plot(type='scatter')
         experiment.plot()
 
-
-
+        experiment.save_error_estimators()
 
 
     # CONFIGURATION MANAGER
@@ -423,8 +394,6 @@ if __name__ == "__main__":
 
     features = file_config_manager.get_features_config()
 
-    # import sys
-    # sys.exit()
     output_filename = 'ws'+features['window_size'] + '_' + \
                       'h'+features['horizon'] + '_' + \
                       'p'+features['padding'] + '_' + \
@@ -451,11 +420,12 @@ if __name__ == "__main__":
     #SVR
 
     svr = RSupportVector()
+    name = 'svr'
 
     output_manager.set_output_config(
         save = True,
         basedir = file_config_manager.get_output_basedir(),
-        file_prefix = file_config_manager.get_file_prefix('svr'),
+        file_prefix = file_config_manager.get_file_prefix(name),
         output_filename = output_filename
     )
 
@@ -466,11 +436,37 @@ if __name__ == "__main__":
          output_manager=output_manager,
          runner=local_runner)
 
-
+    # Escribir la configuración en el directorio de salida
     directory = file_config_manager.get_output_basedir() + '/' + \
-                file_config_manager.get_file_prefix('svr') + '/'
-    filename = 'config_svr.json'
-    file_config_manager.write_cfg_file(directory+filename,'svr')
+                file_config_manager.get_file_prefix(name) + '/'
+    filename = 'config_' + name + '.json'
+    file_config_manager.write_cfg_file(directory+filename,name)
+
+
+    #LSTM
+
+    lstm = RLSTM()
+    name = 'lstm'
+
+    output_manager.set_output_config(
+        save = True,
+        basedir = file_config_manager.get_output_basedir(),
+        file_prefix = file_config_manager.get_file_prefix(name),
+        output_filename = output_filename
+    )
+
+    launch(
+         regressor=svr,
+         config_manager=file_config_manager,
+         input_manager=input_manager,
+         output_manager=output_manager,
+         runner=local_runner)
+
+    # Escribir la configuración en el directorio de salida
+    directory = file_config_manager.get_output_basedir() + '/' + \
+                file_config_manager.get_file_prefix(name) + '/'
+    filename = 'config_' + name + '.json'
+    file_config_manager.write_cfg_file(directory+filename,name)
 
 
     # Esto es para que se muestren los gráficos en modo no bloqueante
