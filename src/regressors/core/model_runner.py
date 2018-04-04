@@ -154,7 +154,8 @@ class OutputManager(object):
         if option == 'print':
             print(self._data)
 
-    def set_output_config(self,save,basedir,file_prefix,output_filename):
+    def set_output_config(self,save,basedir=None,file_prefix=None,
+                          output_filename=None):
        self._save = save
        self._basedir = basedir
        self._file_prefix = file_prefix
@@ -163,17 +164,24 @@ class OutputManager(object):
     def print_output(self,data):
         print(data)
 
-    def plot_scatter(self,x,y):
-        f, ax = plt.subplots(1,1,figsize=(10,10))
-        x_min = x.min()
-        x_max = x.max()
-        y_min = y.min()
-        y_max = y.max()
-        ax.set_xlim(x_min+1, x_max+1)
-        ax.set_ylim(x_min+1, x_max+1)
-        ax.plot((x_min, x_max), (x_min, x_max), lw=3, c='r')
-        ax.scatter(x,y)
-        plt.show()
+    def plot_scatter(self):
+        x = self._df_prediction['prediction']
+        y = self._df_prediction['target']
+
+        plt.xlabel('prediction')
+        plt.ylabel('target')
+        plt.scatter(x,y,c='b')
+
+        if self._save:
+
+            directory = self._basedir + '/' + self._file_prefix + '/'
+            filename = directory + 'scatter.png'
+
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+            plt.savefig(filename)
+        else:
+            plt.show(block=False)
 
     def plot_scatter_df(self):
         # df_x = pd.DataFrame(x)
@@ -343,9 +351,8 @@ class Experiment(object):
 
     def plot(self,type=None):
         if type=='scatter':
-            self._output_manager.plot_scatter_df(
-
-                                 )
+            self._output_manager.plot_scatter()
+            # self._output_manager.plot_scatter_df()
         else:
             self._output_manager.plot(
                                  self._output,
@@ -445,28 +452,28 @@ if __name__ == "__main__":
 
     #LSTM
 
-    lstm = RLSTM()
-    name = 'lstm'
-
-    output_manager.set_output_config(
-        save = True,
-        basedir = file_config_manager.get_output_basedir(),
-        file_prefix = file_config_manager.get_file_prefix(name),
-        output_filename = output_filename
-    )
-
-    launch(
-         regressor=svr,
-         config_manager=file_config_manager,
-         input_manager=input_manager,
-         output_manager=output_manager,
-         runner=local_runner)
-
-    # Escribir la configuración en el directorio de salida
-    directory = file_config_manager.get_output_basedir() + '/' + \
-                file_config_manager.get_file_prefix(name) + '/'
-    filename = 'config_' + name + '.json'
-    file_config_manager.write_cfg_file(directory+filename,name)
+    # lstm = RLSTM()
+    # name = 'lstm'
+    #
+    # output_manager.set_output_config(
+    #     save = True,
+    #     basedir = file_config_manager.get_output_basedir(),
+    #     file_prefix = file_config_manager.get_file_prefix(name),
+    #     output_filename = output_filename
+    # )
+    #
+    # launch(
+    #      regressor=svr,
+    #      config_manager=file_config_manager,
+    #      input_manager=input_manager,
+    #      output_manager=output_manager,
+    #      runner=local_runner)
+    #
+    # # Escribir la configuración en el directorio de salida
+    # directory = file_config_manager.get_output_basedir() + '/' + \
+    #             file_config_manager.get_file_prefix(name) + '/'
+    # filename = 'config_' + name + '.json'
+    # file_config_manager.write_cfg_file(directory+filename,name)
 
 
     # Esto es para que se muestren los gráficos en modo no bloqueante
