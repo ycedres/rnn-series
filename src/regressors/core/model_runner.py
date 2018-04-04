@@ -14,6 +14,7 @@ plt.style.use('ggplot')
 from configparser import ConfigParser
 import pandas as pd
 import numpy as np
+import os
 # Models == Receivers
 
 
@@ -104,6 +105,9 @@ class FileConfigManager(ConfigManager):
     def get_input_filename(self):
         return self._config.get('data', 'filename')
 
+    def get_file_prefix(self,name):
+        return self._config.get(name,'file_prefix')
+
     #Returns {'train':{(opt1,val1),(opt2,val2)},'test':{(opt1,val1),(opt2,val2)}}
     def get_operation_config(self):
         pass
@@ -123,6 +127,14 @@ class FileConfigManager(ConfigManager):
     def save_config():
         pass
 
+    def write_cfg_file(self,filename,name):
+        d = self.get_model_config(name)
+        f = open(filename,'w')
+        import json
+        d = json.dumps(d)
+        f.write(d)
+        f.close()
+
     #[{model[0]:config.items(model[0])} for model in config.items('models') if model[1]=='true']
     #d={model[0]:config.items(model[0]) for model in config.items('models') if model[1]=='true'}
 
@@ -141,6 +153,12 @@ class OutputManager(object):
             pass
         if option == 'print':
             print(self._data)
+
+    def set_output_config(self,save,basedir,file_prefix,output_filename):
+       self._save = save
+       self._basedir = basedir
+       self._file_prefix = file_prefix
+       self._output_filename = output_filename
 
     def print_output(self,data):
         print(data)
@@ -180,7 +198,17 @@ class OutputManager(object):
                 y='target',
                 kind='scatter',
                 )
-        plt.show(block=False)
+
+        if self._save:
+
+            directory = self._basedir + '/' + self._file_prefix + '/'
+            filename = directory + 'scatter.png'
+
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+            plt.savefig(filename)
+        else:
+            plt.show(block=False)
 
 
 
@@ -191,7 +219,16 @@ class OutputManager(object):
 
         df.plot(figsize=(15,5))
         # plt.plot(x,y)
-        plt.show(block=False)
+        if self._save:
+            directory = self._basedir + '/' + self._file_prefix + '/'
+            filename = directory + 'serie.png'
+
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+
+            plt.savefig(filename)
+        else:
+            plt.show(block=False)
 
 
     def set_df_prediction(self,x:np.array,y:pd.DataFrame):
@@ -199,6 +236,15 @@ class OutputManager(object):
         df_x.index = y.index
         self._df_prediction = pd.concat([df_x,y],axis=1)
         self._df_prediction.columns = ['prediction','target']
+        if self._save:
+
+            directory = self._basedir + '/' + self._file_prefix + '/'
+            filename = directory + self._output_filename
+
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+
+            self._df_prediction.to_csv(filename,sep=';')
 
 
     def get_test_mae(self):
@@ -293,13 +339,7 @@ class Experiment(object):
                                  self._input_manager.get_test_target()
             )
 
-
-
-
-
-
-
-
+#/////////////////////////////////////////////////////////////
 
 if __name__ == "__main__":
 
@@ -343,6 +383,23 @@ if __name__ == "__main__":
         experiment_lstm.plot()
 
         print(experiment_lstm.get_error_estimators())
+
+    def launch(regressor,config_manager,input_manager,output_manager,runner):
+        experiment = Experiment(config_manager=file_config_manager,
+                                    input_manager=input_manager,
+                                    output_manager=output_manager,
+                                    runner=local_runner)
+
+        train_operation = TrainOperation(regressor)
+        experiment.run_train_operation(train_operation)
+
+        test_operation = TestOperation(regressor)
+        experiment.run_test_operation(test_operation)
+
+        experiment.plot(type='scatter')
+        experiment.plot()
+
+
 
 
 
@@ -389,47 +446,34 @@ if __name__ == "__main__":
 
     input_manager.load_and_split()
 
-    # experiment_dtr = Experiment(config_manager=file_config_manager,
-    #                             input_manager=input_manager,
-    #                             output_manager=output_manager,
-    #                             runner=local_runner)
-    #
-    # dtr = RDecisionTree(file_config_manager.
-    #                     get_model_config(name='dtr'))
-    #
-    # dtr_train_operation = TrainOperation(dtr)
-    # experiment_dtr.run_train_operation(dtr_train_operation)
-    #
-    # dtr_test_operation = TestOperation(dtr)
-    # result = experiment_dtr.run_test_operation(dtr_test_operation)
-    # #experiment_dtr.print_output()
-    #
-    # experiment_dtr.plot()
+    # EXPERIMENTOS
 
-    exp_svr(config_manager=file_config_manager,
+    #SVR
+
+    svr = RSupportVector()
+
+    output_manager.set_output_config(
+        save = True,
+        basedir = file_config_manager.get_output_basedir(),
+        file_prefix = file_config_manager.get_file_prefix('svr'),
+        output_filename = output_filename
+    )
+
+    launch(
+         regressor=svr,
+         config_manager=file_config_manager,
          input_manager=input_manager,
          output_manager=output_manager,
          runner=local_runner)
 
 
-    # experiment_svr = Experiment(config_manager=file_config_manager,
-    #                             input_manager=input_manager,
-    #                             output_manager=output_manager,
-    #                             runner=local_runner)
-    #
-    # svr = RSupportVector()
-    # svr_train_operation = TrainOperation(svr)
-    # experiment_svr.run_train_operation(svr_train_operation)
-    #
-    # svr_test_operation = TestOperation(svr)
-    # result = experiment_svr.run_test_operation(svr_test_operation)
-    #
-    # experiment_svr.plot(type='scatter')
-    #
-    # experiment_svr.plot()
+    directory = file_config_manager.get_output_basedir() + '/' + \
+                file_config_manager.get_file_prefix('svr') + '/'
+    filename = 'config_svr.json'
+    file_config_manager.write_cfg_file(directory+filename,'svr')
 
-    #####
+
     # Esto es para que se muestren los gráficos en modo no bloqueante
-    plt.show()
-    import sys
-    sys.exit()
+    # plt.show()
+    # import sys
+    # sys.exit()
