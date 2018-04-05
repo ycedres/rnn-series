@@ -3,8 +3,9 @@ from sklearn.svm import SVR
 
 class RSupportVector(object):
 
-    def __init__(self, config=None):
-        self._reg = SVR(C=9,gamma='auto',kernel='rbf')
+    def __init__(self, config_dict):
+        self._reg = SVR(C=int(config_dict['C']),gamma=config_dict['gamma'],
+        kernel=config_dict['kernel'])
 
     def train(self, features_train_set,
                     target_train_set,

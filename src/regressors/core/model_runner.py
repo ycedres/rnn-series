@@ -94,6 +94,7 @@ class FileConfigManager(ConfigManager):
     def __init__(self,filename):
         self._filename = filename
         self._config = ConfigParser()
+        self._config.optionxform=str
         self._config.read(filename)
 
     def get_input_basedir(self):
@@ -433,9 +434,9 @@ if __name__ == "__main__":
     # EXPERIMENTOS
 
     #SVR
-
-    svr = RSupportVector()
     name = 'svr'
+    print(file_config_manager.get_model_config(name))
+    svr = RSupportVector(file_config_manager.get_model_config(name))
 
     output_manager.set_output_config(
         save = True,
@@ -456,7 +457,6 @@ if __name__ == "__main__":
     directory = file_config_manager.get_output_basedir() + '/' + \
                 name + '_'  + input_descriptor_string + '/'
     filename = 'config_' + name + '.json'
-    print(directory+filename,name)
     file_config_manager.write_cfg_file(directory+filename,name)
 
 
