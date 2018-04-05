@@ -155,11 +155,13 @@ class OutputManager(object):
             print(self._data)
 
     def set_output_config(self,save,basedir=None,file_prefix=None,
+                          input_descriptor_string=None,
                           output_filename=None):
        self._save = save
        self._basedir = basedir
        self._file_prefix = file_prefix
        self._output_filename = output_filename
+       self._input_descriptor_string = input_descriptor_string
 
     def print_output(self,data):
         print(data)
@@ -210,7 +212,9 @@ class OutputManager(object):
 
         if self._save:
 
-            directory = self._basedir + '/' + self._file_prefix + '/'
+            directory = self._basedir + '/' + self._file_prefix + '_' + \
+            self._input_descriptor_string + '/'
+
             filename = directory + 'scatter.png'
 
             if not os.path.exists(directory):
@@ -247,7 +251,8 @@ class OutputManager(object):
         self._df_prediction.columns = ['prediction','target']
         if self._save:
 
-            directory = self._basedir + '/' + self._file_prefix + '/'
+            directory = self._basedir + '/' + self._file_prefix + '_' + \
+            self._input_descriptor_string + '/'
             filename = directory + self._output_filename
 
             if not os.path.exists(directory):
@@ -268,7 +273,8 @@ class OutputManager(object):
 
     def save_error_estimators(self,d):
 
-        directory = self._basedir + '/' + self._file_prefix + '/'
+        directory = self._basedir + '/' + self._file_prefix + '_' + \
+        self._input_descriptor_string + '/'
         filename = directory + 'errors.json'
 
         if not os.path.exists(directory):
@@ -402,12 +408,13 @@ if __name__ == "__main__":
 
     features = file_config_manager.get_features_config()
 
-    output_filename = 'ws'+features['window_size'] + '_' + \
+    input_descriptor_string = 'ws'+features['window_size'] + '_' + \
                       'h'+features['horizon'] + '_' + \
                       'p'+features['padding'] + '_' + \
                       'sz'+features['step_size'] + '_' + \
-                      features['method'] +\
-                      '.csv'
+                      features['method']
+
+    output_filename = input_descriptor_string + '.csv'
 
     input_manager.configure_features_generator(
         window_size=int(features['window_size']),
@@ -434,6 +441,7 @@ if __name__ == "__main__":
         save = True,
         basedir = file_config_manager.get_output_basedir(),
         file_prefix = file_config_manager.get_file_prefix(name),
+        input_descriptor_string = input_descriptor_string,
         output_filename = output_filename
     )
 
@@ -446,8 +454,9 @@ if __name__ == "__main__":
 
     # Escribir la configuración en el directorio de salida
     directory = file_config_manager.get_output_basedir() + '/' + \
-                file_config_manager.get_file_prefix(name) + '/'
+                name + '_'  + input_descriptor_string + '/'
     filename = 'config_' + name + '.json'
+    print(directory+filename,name)
     file_config_manager.write_cfg_file(directory+filename,name)
 
 
