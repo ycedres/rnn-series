@@ -165,8 +165,8 @@ class OutputManager(object):
         print(data)
 
     def plot_scatter(self):
-        x = self._df_prediction['prediction']
-        y = self._df_prediction['target']
+        x = self._df_prediction['target']
+        y = self._df_prediction['prediction']
 
         plt.xlabel('prediction')
         plt.ylabel('target')
@@ -183,13 +183,13 @@ class OutputManager(object):
         else:
             plt.show(block=False)
 
-    def plot_scatter_df(self):
+    def plot_scatter_diagonal(self):
         # df_x = pd.DataFrame(x)
         # df_x.index = y.index
         # df = pd.concat([df_x,y],axis=1)
         # df.columns = ['a','b']
-        x = self._df_prediction['prediction']
-        y = self._df_prediction['target']
+        x = self._df_prediction['target']
+        y = self._df_prediction['prediction']
 
         f, ax = plt.subplots(1,1,figsize=(10,10))
         x_min = x.min()
@@ -199,13 +199,14 @@ class OutputManager(object):
         ax.set_xlim(x_min+1, x_max+1)
         ax.set_ylim(x_min+1, x_max+1)
         ax.plot((x_min, x_max), (x_min, x_max), lw=3, c='r')
-        ax.scatter(x,y)
+        ax.scatter(x,y,c='b')
         #plt.figure()
-        self._df_prediction.plot(ax=ax,
-                x='prediction',
-                y='target',
-                kind='scatter',
-                )
+        # self._df_prediction.plot(ax=ax,
+        #         x='prediction',
+        #         y='target',
+        #         kind='scatter',
+        #         c='b'
+        #         )
 
         if self._save:
 
@@ -351,8 +352,8 @@ class Experiment(object):
 
     def plot(self,type=None):
         if type=='scatter':
-            self._output_manager.plot_scatter()
-            # self._output_manager.plot_scatter_df()
+            # self._output_manager.plot_scatter()
+            self._output_manager.plot_scatter_diagonal()
         else:
             self._output_manager.plot(
                                  self._output,
@@ -376,7 +377,7 @@ if __name__ == "__main__":
         experiment.run_test_operation(test_operation)
 
         experiment.plot(type='scatter')
-        experiment.plot()
+        # experiment.plot()
 
         experiment.save_error_estimators()
 
