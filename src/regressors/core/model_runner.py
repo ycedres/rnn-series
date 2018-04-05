@@ -434,9 +434,36 @@ if __name__ == "__main__":
     # EXPERIMENTOS
 
     #SVR
-    name = 'svr'
-    print(file_config_manager.get_model_config(name))
-    svr = RSupportVector(file_config_manager.get_model_config(name))
+    # name = 'svr'
+    # print(file_config_manager.get_model_config(name))
+    # svr = RSupportVector(file_config_manager.get_model_config(name))
+    #
+    # output_manager.set_output_config(
+    #     save = True,
+    #     basedir = file_config_manager.get_output_basedir(),
+    #     file_prefix = file_config_manager.get_file_prefix(name),
+    #     input_descriptor_string = input_descriptor_string,
+    #     output_filename = output_filename
+    # )
+    #
+    # launch(
+    #      regressor=svr,
+    #      config_manager=file_config_manager,
+    #      input_manager=input_manager,
+    #      output_manager=output_manager,
+    #      runner=local_runner)
+    #
+    # # Escribir la configuración en el directorio de salida
+    # directory = file_config_manager.get_output_basedir() + '/' + \
+    #             name + '_'  + input_descriptor_string + '/'
+    # filename = 'config_' + name + '.json'
+    # file_config_manager.write_cfg_file(directory+filename,name)
+
+
+    #LSTM
+
+    lstm = RLSTM()
+    name = 'lstm'
 
     output_manager.set_output_config(
         save = True,
@@ -447,37 +474,11 @@ if __name__ == "__main__":
     )
 
     launch(
-         regressor=svr,
+         regressor=lstm,
          config_manager=file_config_manager,
          input_manager=input_manager,
          output_manager=output_manager,
          runner=local_runner)
-
-    # Escribir la configuración en el directorio de salida
-    directory = file_config_manager.get_output_basedir() + '/' + \
-                name + '_'  + input_descriptor_string + '/'
-    filename = 'config_' + name + '.json'
-    file_config_manager.write_cfg_file(directory+filename,name)
-
-
-    #LSTM
-
-    # lstm = RLSTM()
-    # name = 'lstm'
-    #
-    # output_manager.set_output_config(
-    #     save = True,
-    #     basedir = file_config_manager.get_output_basedir(),
-    #     file_prefix = file_config_manager.get_file_prefix(name),
-    #     output_filename = output_filename
-    # )
-    #
-    # launch(
-    #      regressor=svr,
-    #      config_manager=file_config_manager,
-    #      input_manager=input_manager,
-    #      output_manager=output_manager,
-    #      runner=local_runner)
     #
     # # Escribir la configuración en el directorio de salida
     # directory = file_config_manager.get_output_basedir() + '/' + \
