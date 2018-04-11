@@ -17,6 +17,11 @@ class NRELInputManager(InputManager):
         #TODO Parámentros: parque, turbina, rango temporal...
         #Fuente: parámetros de conexión, ruta fichero...
         self._ts = None
+        self._ts_ref = None
+        if 'periods_reference' in kwargs.keys():
+            self._periods_reference = kwargs['periods_reference']
+        else:
+            self._periods_reference = None
         pass
 
     def configure_load_datasource(self,method,**kwargs):
@@ -24,6 +29,7 @@ class NRELInputManager(InputManager):
         if method=='filesystem':
             if 'filename' in kwargs.keys():
                 self._ts = self.get_ts(filename=kwargs['filename'])
+                self._ts_ref = self._ts.shift(periods=1)
 
 
 
@@ -112,6 +118,22 @@ class NRELInputManager(InputManager):
 
     def get_features_target(self):
         return self._df
+
+
+    def get_reference_serie(self,type='persistence',periods=None):
+        if type=='persistence':
+            if periods is not None:
+                self._ts_ref = self._ts.shift(periods=periods)
+            elif self._periods_reference is not None:
+                self._ts_ref = self._ts.shift(periods=self._periods_reference)
+            else:
+                self._ts_ref = self._ts.shift(periods=1)
+
+        return self._ts_ref
+
+    def get_reference_rmse(self):
+        from sklearn.metrics import mean_squared_error
+        return mean_squared_error(self._ts[1:],self._ts_ref[1:])
 
 if __name__ == "__main__":
     #pozo_izquierdo_ts()

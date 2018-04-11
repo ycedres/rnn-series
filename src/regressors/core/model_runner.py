@@ -186,7 +186,7 @@ class OutputManager(object):
         else:
             plt.show(block=False)
 
-    def plot_scatter_diagonal(self):
+    def plot_scatter_diagonal(self,title):
         # df_x = pd.DataFrame(x)
         # df_x.index = y.index
         # df = pd.concat([df_x,y],axis=1)
@@ -203,6 +203,8 @@ class OutputManager(object):
         ax.set_ylim(x_min+1, x_max+1)
         ax.plot((x_min, x_max), (x_min, x_max), lw=3, c='r')
         ax.scatter(x,y,c='b')
+        ax.set(xlabel='target', ylabel='prediction')
+        ax.set_title(title)
         #plt.figure()
         # self._df_prediction.plot(ax=ax,
         #         x='prediction',
@@ -272,8 +274,10 @@ class OutputManager(object):
                                        self._df_prediction.target, 2)
         return self._df_prediction.mse.sum() / len(self._df_prediction.mse)
 
-    def save_error_estimators(self,d):
+    def get_test_r2(self,reference_mse):
+        return (reference_mse - self.get_test_mse()) / reference_mse
 
+    def save_error_estimators(self,d):
         directory = self._basedir + '/' + self._file_prefix + '_' + \
         self._input_descriptor_string + '/'
         filename = directory + 'errors.json'
@@ -293,13 +297,14 @@ class OutputManager(object):
 #Client
 class Experiment(object):
 
-    def __init__(self,config_manager,input_manager,output_manager,runner):
+    def __init__(self,config_manager,input_manager,output_manager,runner,description):
         self._config_manager = config_manager
         self._input_manager = input_manager
         self._output_manager = output_manager
         self._runner = runner
         self._data = None
         self._output = None
+        self._description=description
 
     # INPUT
 
@@ -341,8 +346,10 @@ class Experiment(object):
                              )
 
     def get_error_estimators(self):
+        reference_mse = self._input_manager.get_reference_rmse()
         return {'mse':self._output_manager.get_test_mse(),
-                'mae':self._output_manager.get_test_mae()}
+                'mae':self._output_manager.get_test_mae(),
+                'r2':self._output_manager.get_test_r2(reference_mse)}
 
     def save_error_estimators(self):
         self._output_manager.save_error_estimators(self.get_error_estimators())
@@ -360,7 +367,7 @@ class Experiment(object):
     def plot(self,type=None):
         if type=='scatter':
             # self._output_manager.plot_scatter()
-            self._output_manager.plot_scatter_diagonal()
+            self._output_manager.plot_scatter_diagonal(title=self._description)
         else:
             self._output_manager.plot(
                                  self._output,
@@ -371,11 +378,14 @@ class Experiment(object):
 
 if __name__ == "__main__":
 
-    def launch(regressor,config_manager,input_manager,output_manager,runner):
+    def launch(regressor,config_manager,input_manager,output_manager,runner,
+    description):
+
         experiment = Experiment(config_manager=file_config_manager,
                                     input_manager=input_manager,
                                     output_manager=output_manager,
-                                    runner=local_runner)
+                                    runner=local_runner,
+                                    description=description)
 
         train_operation = TrainOperation(regressor)
         experiment.run_train_operation(train_operation)
@@ -390,7 +400,7 @@ if __name__ == "__main__":
 
 
     # CONFIGURATION MANAGER
-    config_file_name = '/home/ycedres/Projects/RNN/RNN-windPower/src/regressors/core/config.ini'
+    config_file_name = '/home/ycedres/Projects/PhD/wind/RNN-windPower/src/regressors/core/config.ini'
 
     file_config_manager = FileConfigManager(filename=config_file_name)
     basedir = file_config_manager.get_input_basedir()
@@ -422,7 +432,7 @@ if __name__ == "__main__":
         horizon=int(features['horizon']),
         padding=int(features['padding']),
         step_size=int(features['step_size']),
-        write_csv_file=True,
+        write_csv_file=False,
         output_csv_file=file_config_manager.get_output_basedir()+
                         output_filename,
         #method='sequential',
@@ -478,7 +488,8 @@ if __name__ == "__main__":
          config_manager=file_config_manager,
          input_manager=input_manager,
          output_manager=output_manager,
-         runner=local_runner)
+         runner=local_runner,
+         description=input_descriptor_string)
     #
     # # Escribir la configuración en el directorio de salida
     # directory = file_config_manager.get_output_basedir() + '/' + \
