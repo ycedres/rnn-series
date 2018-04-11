@@ -92,8 +92,8 @@ class RLSTM(object):
     def _fit_model(self,model, x_train, y_train, x_val, y_val, exp_path,
                   epochs=100, batch_size=50, lr=0.001):
 
-        tensorboard = TensorBoard(log_dir=os.path.join(exp_path, 'graph'),
-                                  histogram_freq=1)
+        # tensorboard = TensorBoard(log_dir=os.path.join(exp_path, 'graph'),
+        #                           histogram_freq=1)
 
         opt = Adam(lr=lr)
         model.compile(loss='mean_squared_error',
@@ -104,7 +104,8 @@ class RLSTM(object):
                             y_train,
                             batch_size=batch_size,
                             epochs=epochs,
-                            validation_data=(x_val, y_val),
-                            callbacks=[tensorboard])
+                            validation_data=(x_val, y_val)
+                            #callbacks=[tensorboard]
+                            )
 
         return model, history

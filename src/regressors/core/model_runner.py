@@ -84,14 +84,24 @@ class TestOperation(Operation):
 
 class ConfigManager:
 
-    def __init__(self,type):
-        pass
+    def __init__(self):
+        self._model_config = None
+        self._features_config = None
+        self._data_config = None
 
+    def set_features_config(self,d):
+        self._features_config = d
 
+    def set_model_config(self,d):
+        self._model_config = d
+
+    def set_data_config(self,d):
+        self._data_config = d
 
 class FileConfigManager(ConfigManager):
 
     def __init__(self,filename):
+        ConfigManager.__init__(self)
         self._filename = filename
         self._config = ConfigParser()
         self._config.optionxform=str
@@ -114,7 +124,10 @@ class FileConfigManager(ConfigManager):
         pass
 
     def get_features_config(self):
-        return dict(self._config.items('features'))
+        if self._features_config is None:
+            return dict(self._config.items('features'))
+        else:
+            return self._features_config
 
     #Returns {'knn':{(opt1,val1),(opt2,val2)},'lstm':{(opt1,val1),(opt2,val2)}}
     def get_model_config(self,name):
@@ -274,6 +287,9 @@ class OutputManager(object):
                                        self._df_prediction.target, 2)
         return self._df_prediction.mse.sum() / len(self._df_prediction.mse)
 
+    def get_test_rmse(self):
+        return np.sqrt(self.get_test_mse())
+
     def get_test_r2(self,reference_mse):
         return (reference_mse - self.get_test_mse()) / reference_mse
 
@@ -283,6 +299,7 @@ class OutputManager(object):
         filename = directory + 'errors.json'
 
         if not os.path.exists(directory):
+
             os.makedirs(directory)
 
         f = open(filename,'w')
@@ -348,6 +365,7 @@ class Experiment(object):
     def get_error_estimators(self):
         reference_mse = self._input_manager.get_reference_rmse()
         return {'mse':self._output_manager.get_test_mse(),
+                'rmse':self._output_manager.get_test_rmse(),
                 'mae':self._output_manager.get_test_mae(),
                 'r2':self._output_manager.get_test_r2(reference_mse)}
 
@@ -400,7 +418,7 @@ if __name__ == "__main__":
 
 
     # CONFIGURATION MANAGER
-    config_file_name = '/home/ycedres/Projects/PhD/wind/RNN-windPower/src/regressors/core/config.ini'
+    config_file_name = '/home/ycedres/Projects/RNN/RNN-windPower/src/regressors/core/config.ini'
 
     file_config_manager = FileConfigManager(filename=config_file_name)
     basedir = file_config_manager.get_input_basedir()
