@@ -5,7 +5,7 @@ from models.ml.RLSTM import RLSTM
 from models.ml.RSimpleLSTM import RSimpleLSTM
 
 # CONFIGURATION MANAGER
-config_file_name = '/home/ycedres/Projects/PhD/wind/RNN-windPower/src/regressors/core/config.ini'
+config_file_name = '/home/ycedres/Projects/RNN/RNN-windPower/src/regressors/core/config.ini'
 file_config_manager = FileConfigManager(filename=config_file_name)
 basedir = file_config_manager.get_input_basedir()
 filename = file_config_manager.get_input_filename()
@@ -48,9 +48,10 @@ description):
 if __name__ == "__main__":
 
     features = file_config_manager.get_features_config()
-    lstm = RLSTM()
-    #lstm = RSimpleLSTM()
-    name = 'lstm'
+    name = 'lstm_simple'
+
+    #lstm = RLSTM()
+    lstm = RSimpleLSTM()
 
     for horizon in range(1,2):
 
@@ -59,6 +60,10 @@ if __name__ == "__main__":
                           'p'+features['padding'] + '_' + \
                           'sz'+features['step_size'] + '_' + \
                           features['method']
+
+        lstm.config_exp_path(basedir = file_config_manager.get_output_basedir(),
+                    file_prefix = file_config_manager.get_file_prefix(name),
+                    input_descriptor_string = input_descriptor_string)
 
         output_filename = input_descriptor_string + '.csv'
 

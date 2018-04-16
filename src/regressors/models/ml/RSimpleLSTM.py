@@ -16,6 +16,13 @@ class RSimpleLSTM(object):
     def __init__(self, config=None):
         self._reg = self._create_model(6, 1, plot_title='lstm')
 
+    def config_exp_path(self,basedir=None,file_prefix=None,
+                 input_descriptor_string=None):
+
+        self._basedir = basedir
+        self._file_prefix = file_prefix
+        self._input_descriptor_string = input_descriptor_string
+
     def train(self, features_train_set,
                     target_train_set,
                     features_validation_set,
@@ -33,10 +40,13 @@ class RSimpleLSTM(object):
         x_val_lstm = np.reshape(x_val, (x_val.shape[0],
                                         x_val.shape[1], 1))
 
+        directory = self._basedir + '/' + self._file_prefix + '_' + \
+        self._input_descriptor_string + '/'
+
         model, history = self._fit_model(self._reg, x_train_lstm, y_train,
                                           x_val_lstm, y_val,
-                                          exp_path='/tmp/nn-lstm-weights-normal',
-                                          batch_size=1024, epochs=50)
+                                          exp_path=directory,
+                                          batch_size=1024, epochs=100)
 
     def test(self,features_test_set):
 

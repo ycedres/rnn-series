@@ -249,12 +249,14 @@ class OutputManager(object):
         df.plot(figsize=(15,5))
         # plt.plot(x,y)
         if self._save:
-            directory = self._basedir + '/' + self._file_prefix + '/'
+
+            directory = self._basedir + '/' + self._file_prefix + '_' + \
+            self._input_descriptor_string + '/'
+
             filename = directory + 'serie.png'
 
             if not os.path.exists(directory):
                 os.makedirs(directory)
-
             plt.savefig(filename)
         else:
             plt.show(block=False)
