@@ -2,9 +2,10 @@ from model_runner import Experiment,FileConfigManager,LocalRunner, \
 OutputManager,NRELInputManager,TrainOperation,TestOperation
 
 from models.ml.RLSTM import RLSTM
+from models.ml.RSimpleLSTM import RSimpleLSTM
 
 # CONFIGURATION MANAGER
-config_file_name = '/home/ycedres/Projects/RNN/RNN-windPower/src/regressors/core/config.ini'
+config_file_name = '/home/ycedres/Projects/PhD/wind/RNN-windPower/src/regressors/core/config.ini'
 file_config_manager = FileConfigManager(filename=config_file_name)
 basedir = file_config_manager.get_input_basedir()
 filename = file_config_manager.get_input_filename()
@@ -36,7 +37,7 @@ description):
     experiment.run_test_operation(test_operation)
 
     experiment.plot(type='scatter')
-    # experiment.plot()
+    experiment.plot()
 
     experiment.save_error_estimators()
 
@@ -48,9 +49,10 @@ if __name__ == "__main__":
 
     features = file_config_manager.get_features_config()
     lstm = RLSTM()
+    #lstm = RSimpleLSTM()
     name = 'lstm'
 
-    for horizon in range(1,13):
+    for horizon in range(1,2):
 
         input_descriptor_string = 'ws'+features['window_size'] + '_' + \
                           'h'+str(horizon) + '_' + \
@@ -65,7 +67,7 @@ if __name__ == "__main__":
             horizon=horizon,
             padding=int(features['padding']),
             step_size=int(features['step_size']),
-            write_csv_file=False,
+            write_csv_file=True,
             output_csv_file=file_config_manager.get_output_basedir()+
                             output_filename,
             #method='sequential',

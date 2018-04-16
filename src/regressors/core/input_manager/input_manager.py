@@ -213,7 +213,7 @@ class InputManager(object):
 
     def get_train_features(self):
         # features and target columns
-        features_columns = self._train_set.columns[1:-1]
+        features_columns = self._train_set.columns[0:-1]
         # select the values of features and target columns.
         features_train_set = self._train_set[features_columns]
         return features_train_set
@@ -224,7 +224,7 @@ class InputManager(object):
         return target_train_set
 
     def get_validation_features(self):
-        features_columns = self._train_set.columns[1:-1]
+        features_columns = self._train_set.columns[0:-1]
         features_validation_set = self._validation_set[features_columns]
         return features_validation_set
 
@@ -234,7 +234,7 @@ class InputManager(object):
         return target_validation_set
 
     def get_test_features(self):
-        features_columns = self._train_set.columns[1:-1]
+        features_columns = self._train_set.columns[0:-1]
         features_test_set = self._test_set[features_columns]
         return features_test_set
 

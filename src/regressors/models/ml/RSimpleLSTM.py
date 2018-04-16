@@ -11,7 +11,7 @@ from keras.callbacks import TensorBoard
 
 import os
 
-class RLSTM(object):
+class RSimpleLSTM(object):
 
     def __init__(self, config=None):
         self._reg = self._create_model(6, 1, plot_title='lstm')
@@ -29,13 +29,14 @@ class RLSTM(object):
         x_train_lstm = np.reshape(x_train, (x_train.shape[0],
                                             x_train.shape[1], 1))
 
+
         x_val_lstm = np.reshape(x_val, (x_val.shape[0],
                                         x_val.shape[1], 1))
 
         model, history = self._fit_model(self._reg, x_train_lstm, y_train,
                                           x_val_lstm, y_val,
                                           exp_path='/tmp/nn-lstm-weights-normal',
-                                          batch_size=1024, epochs=1)
+                                          batch_size=1024, epochs=50)
 
     def test(self,features_test_set):
 
@@ -53,25 +54,34 @@ class RLSTM(object):
                        feature_by_timestep),
                        dtype='float32',
                        name='input-layer')
-        normalize_input = BatchNormalization(name='normalize-input')(input)
+        #normalize_input = BatchNormalization(name='normalize-input')(input)
+
         # RNN - LSTM
-        x = LSTM(10,
+        x = LSTM(6,
                  kernel_initializer='normal',
-                 name='lstm-layer')(normalize_input)
+                 name='lstm-layer')(input)
         # Fully-connect
-        x = Dense(10,
-                  kernel_initializer='normal',
-                  activation='relu',
-                  name='hidden-layer-1')(x)
-        x = Dense(5,
-                  kernel_initializer='normal',
-                  activation='relu',
-                  name='hidden-layer-2')(x)
-        x = Dense(3,
-                  kernel_initializer='normal',
-                  activation='relu',
-                  name='hidden-layer-3')(x)
-        #x = Dropout(rate=0.2)(x)
+        # x = Dense(10,
+        #           kernel_initializer='normal',
+        #           activation='relu',
+        #           name='hidden-layer-1')(x)
+        # x = Dense(5,
+        #           kernel_initializer='normal',
+        #           activation='relu',
+        #           name='hidden-layer-2')(x)
+        # x = Dense(4,
+        #           kernel_initializer='normal',
+        #           activation='relu',
+        #           name='hidden-layer-3')(x)
+        # x = Dense(3,
+        #           kernel_initializer='normal',
+        #           activation='relu',
+        #           name='hidden-layer-4')(x)
+        # x = Dense(2,
+        #           kernel_initializer='normal',
+        #           activation='relu',
+        #           name='hidden-layer-5')(x)
+        # x = Dropout(rate=0.2)(x)
         output = Dense(1,
                        kernel_initializer='normal',
                        activation='linear',
@@ -93,7 +103,7 @@ class RLSTM(object):
                   epochs=100, batch_size=50, lr=0.001):
 
         tensorboard = TensorBoard(log_dir=os.path.join(exp_path, 'graph'),
-                               histogram_freq=1)
+                                  histogram_freq=1)
 
         opt = Adam(lr=lr)
         model.compile(loss='mean_squared_error',
@@ -113,4 +123,4 @@ class RLSTM(object):
 
 if __name__ == '__main__':
     r = RLSTM()
-    r._create_model(6, 1, plot_title='lstm')
+    r._create_model(5, 1, plot_title='lstm')
