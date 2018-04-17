@@ -48,10 +48,11 @@ description):
 if __name__ == "__main__":
 
     features = file_config_manager.get_features_config()
-    name = 'lstm_simple'
+    name = file_config_manager.get_file_prefix('lstm')
 
-    #lstm = RLSTM()
-    lstm = RSimpleLSTM()
+    lstm = RLSTM()
+    # lstm = RSimpleLSTM()
+    has_been_plotted = False
 
     for horizon in range(1,2):
 
@@ -64,6 +65,9 @@ if __name__ == "__main__":
         lstm.config_exp_path(basedir = file_config_manager.get_output_basedir(),
                     file_prefix = file_config_manager.get_file_prefix(name),
                     input_descriptor_string = input_descriptor_string)
+
+        if not has_been_plotted:
+            lstm.plot_model()
 
         output_filename = input_descriptor_string + '.csv'
 

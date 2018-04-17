@@ -13,8 +13,18 @@ import os
 
 class RLSTM(object):
 
-    def __init__(self, config=None):
-        self._reg = self._create_model(6, 1, plot_title='lstm')
+    def __init__(self, config=None,basedir=None,file_prefix=None,
+                 input_descriptor_string=None):
+
+        if basedir is not None:
+            self._basedir = basedir
+        if file_prefix is not None:
+            self._file_prefix = file_prefix
+        if input_descriptor_string is not None:
+            self._input_descriptor_string = input_descriptor_string
+
+        self._plot_title = 'lstm'
+        self._reg = self._create_model(6, 1)
 
     def config_exp_path(self,basedir=None,file_prefix=None,
                  input_descriptor_string=None):
@@ -56,8 +66,7 @@ class RLSTM(object):
 
 
 
-    def _create_model(self,time_step, feature_by_timestep,
-                     plot_title):
+    def _create_model(self,time_step, feature_by_timestep):
         # Input layer
         input = Input((time_step,
                        feature_by_timestep),
@@ -65,7 +74,7 @@ class RLSTM(object):
                        name='input-layer')
         normalize_input = BatchNormalization(name='normalize-input')(input)
         # RNN - LSTM
-        x = LSTM(10,
+        x = LSTM(6,
                  kernel_initializer='normal',
                  name='lstm-layer')(normalize_input)
         # Fully-connect
@@ -91,7 +100,7 @@ class RLSTM(object):
         model.summary()
 
         plot_model(model,
-                   to_file='{0}.png'.format(plot_title),
+                   to_file='{0}.png'.format(self._plot_title),
                    show_shapes=True,
                    show_layer_names=True,
                    rankdir='LR')
@@ -119,6 +128,21 @@ class RLSTM(object):
                             )
 
         return model, history
+
+
+    def plot_model(self):
+
+        directory = self._basedir + '/' + self._file_prefix + '_' + \
+        self._input_descriptor_string + '/'
+
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        plot_model(self._reg,
+                   to_file=directory+'{0}.png'.format(self._plot_title),
+                   show_shapes=True,
+                   show_layer_names=True,
+                   rankdir='LR')
 
 
 if __name__ == '__main__':
