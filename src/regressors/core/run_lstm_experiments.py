@@ -4,8 +4,11 @@ OutputManager,NRELInputManager,TrainOperation,TestOperation
 from models.ml.RLSTM import RLSTM
 from models.ml.RSimpleLSTM import RSimpleLSTM
 
+import os
+import pandas as pd
+
 # CONFIGURATION MANAGER
-config_file_name = '/home/ycedres/Projects/RNN/RNN-windPower/src/regressors/core/config.ini'
+config_file_name = '/home/ycedres/Projects/PhD/wind/RNN-windPower/src/regressors/core/config.ini'
 file_config_manager = FileConfigManager(filename=config_file_name)
 basedir = file_config_manager.get_input_basedir()
 filename = file_config_manager.get_input_filename()
@@ -48,7 +51,8 @@ description):
 if __name__ == "__main__":
 
     features = file_config_manager.get_features_config()
-    name = file_config_manager.get_file_prefix('lstm')
+    # name = file_config_manager.get_file_prefix('lstm_1')
+    name = 'lstm_3'
 
     lstm = RLSTM()
     # lstm = RSimpleLSTM()
@@ -63,13 +67,17 @@ if __name__ == "__main__":
                           features['method']
 
         lstm.config_exp_path(basedir = file_config_manager.get_output_basedir(),
-                    file_prefix = file_config_manager.get_file_prefix(name),
+                    #file_prefix = file_config_manager.get_file_prefix(name),
+                    file_prefix = name,
                     input_descriptor_string = input_descriptor_string)
 
         if not has_been_plotted:
             lstm.plot_model()
 
         output_filename = input_descriptor_string + '.csv'
+        output_filename_dataframe = input_descriptor_string + '_dataframe' + '.csv'
+        output_filename_path = file_config_manager.get_output_basedir() + output_filename
+        output_filename_path_dataframe = file_config_manager.get_output_basedir() + output_filename_dataframe
 
         input_manager.configure_features_generator(
             window_size=int(features['window_size']),
@@ -77,18 +85,25 @@ if __name__ == "__main__":
             padding=int(features['padding']),
             step_size=int(features['step_size']),
             write_csv_file=True,
-            output_csv_file=file_config_manager.get_output_basedir()+
-                            output_filename,
+            output_csv_file=output_filename_path_dataframe,
             #method='sequential',
             method=features['method']
         )
 
-        input_manager.load_and_split()
+
+
+        if os.path.exists(output_filename_path_dataframe):
+            parse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
+            df = pd.read_csv(output_filename_path_dataframe,sep=';',date_parser=parse,index_col=0)
+            input_manager.load_dataframe(df)
+        else:
+            input_manager.load_and_split()
 
         output_manager.set_output_config(
             save = True,
             basedir = file_config_manager.get_output_basedir(),
-            file_prefix = file_config_manager.get_file_prefix(name),
+            # file_prefix = file_config_manager.get_file_prefix(name),
+            file_prefix = name,
             input_descriptor_string = input_descriptor_string,
             output_filename = output_filename
         )

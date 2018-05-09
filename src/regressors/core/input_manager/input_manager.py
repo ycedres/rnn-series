@@ -242,3 +242,30 @@ class InputManager(object):
         target_column = self._train_set.columns[-1:]
         target_test_set = self._test_set[target_column]
         return target_test_set
+
+
+    def load_dataframe(self,data):
+        self._df = data
+        self.dataframe_split()
+
+    def load_train_set(self,data):
+        self._train_set = data
+
+    def load_validation_set(self,data):
+        self._validation_set = data
+
+    def load_test_set(self,data):
+        self._test_set = data
+
+    def load_train_features(self,data):
+        pass
+    def load_train_target(self,data):
+        pass
+    def load_validation_features(self,data):
+        pass
+    def load_valication_target(self,data):
+        pass
+    def set_test_features(self,data):
+        pass
+    def set_test_target(self,data):
+        pass
