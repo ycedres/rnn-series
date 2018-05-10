@@ -55,7 +55,7 @@ class RLSTM(object):
         model, history = self._fit_model(self._reg, x_train_lstm, y_train,
                                           x_val_lstm, y_val,
                                           exp_path=directory,
-                                          batch_size=1024, epochs=100)
+                                          batch_size=1024, epochs=200)
 
     def test(self,features_test_set):
 
@@ -74,22 +74,35 @@ class RLSTM(object):
                        name='input-layer')
         normalize_input = BatchNormalization(name='normalize-input')(input)
         # RNN - LSTM
+
+        from keras import backend as K
+        from keras.layers import Activation
+        from keras.utils.generic_utils import get_custom_objects
+        import math
+        import tensorflow as tf
+        def custom_activation(x):
+            return (K.tanh(x))
+            #return (K.log(K.sigmoid(x)))
+        get_custom_objects().update({'custom_activation': Activation(custom_activation)})
+
         x = LSTM(6,
                  kernel_initializer='normal',
+                 activation='custom_activation',
                  name='lstm-layer')(normalize_input)
         # Fully-connect
-        x = Dense(10,
-                  kernel_initializer='normal',
-                  activation='relu',
-                  name='hidden-layer-1')(x)
-        x = Dense(5,
-                  kernel_initializer='normal',
-                  activation='relu',
-                  name='hidden-layer-2')(x)
         x = Dense(3,
                   kernel_initializer='normal',
                   activation='relu',
-                  name='hidden-layer-3')(x)
+                  name='embudo-1')(x)
+        x = Dense(6,
+                  kernel_initializer='normal',
+                  activation='relu',
+                  name='embudo-2')(x)
+        # x = Dense(5,
+        #           kernel_initializer='normal',
+        #           activation='relu',
+        #           name='hidden-layer-2')(x)
+
         #x = Dropout(rate=0.2)(x)
         output = Dense(1,
                        kernel_initializer='normal',
@@ -123,8 +136,8 @@ class RLSTM(object):
                             y_train,
                             batch_size=batch_size,
                             epochs=epochs,
-                            validation_data=(x_val, y_val),
-                            callbacks=[tensorboard]
+                            validation_data=(x_val, y_val)
+                            #callbacks=[tensorboard]
                             )
 
         return model, history
