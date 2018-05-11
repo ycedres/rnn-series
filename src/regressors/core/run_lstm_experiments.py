@@ -3,12 +3,12 @@ OutputManager,NRELInputManager,TrainOperation,TestOperation
 
 from models.ml.RLSTM import RLSTM
 from models.ml.RSimpleLSTM import RSimpleLSTM
-
+from models.ml.RStackedLSTM import RStackedLSTM
 import os
 import pandas as pd
 
 # CONFIGURATION MANAGER
-config_file_name = '/home/ycedres/Projects/PhD/wind/RNN-windPower/src/regressors/core/config.ini'
+config_file_name = '/home/ycedres/Projects/RNN/RNN-windPower/src/regressors/core/config.ini'
 file_config_manager = FileConfigManager(filename=config_file_name)
 basedir = file_config_manager.get_input_basedir()
 filename = file_config_manager.get_input_filename()
@@ -56,6 +56,7 @@ if __name__ == "__main__":
 
     lstm = RLSTM()
     # lstm = RSimpleLSTM()
+    # lstm = RStackedLSTM()
     has_been_plotted = False
 
     for horizon in range(1,2):

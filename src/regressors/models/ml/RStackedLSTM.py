@@ -11,7 +11,7 @@ from keras.callbacks import TensorBoard
 
 import os
 
-class RLSTM(object):
+class RStackedLSTM(object):
 
     def __init__(self, config=None,basedir=None,file_prefix=None,
                  input_descriptor_string=None):
@@ -80,26 +80,15 @@ class RLSTM(object):
         from keras.utils.generic_utils import get_custom_objects
         import math
         import tensorflow as tf
-
-        def relu_noise(x):
-
-            isPositive = K.greater(x,0)
-
-            noise = K.random_normal((K.shape(x)), mean=0.5, stddev=0.5)
-             #I'm just not sure this is exactly the kind of noise you want.
-
-            return (x * K.cast(isPositive,tf.float32)) + noise
-
         def custom_activation(x):
-            #return (K.tanh(x)+relu_noise(x))
             return (K.tanh(x))
             #return (K.log(K.sigmoid(x)))
         get_custom_objects().update({'custom_activation': Activation(custom_activation)})
 
-        x = LSTM(6,
-                 kernel_initializer='normal',
-                 activation='custom_activation',
-                 name='lstm-layer')(normalize_input)
+        # Stack - RNN - LSTM
+        x = LSTM(6, return_sequences=True, name='lstm-1')(normalize_input)
+        x = LSTM(5, name='lstm-2')(x)
+
         # Fully-connect
         x = Dense(3,
                   kernel_initializer='normal',
