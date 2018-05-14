@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(0, '/home/ycedres/Projects/PhD/wind/RNN-windPower/src/regressors/core')
+sys.path.insert(0, '/home/ycedres/Projects/RNN/RNN-windPower/src/regressors/core/')
 
 from model_runner import Experiment,LocalRunner, \
 OutputManager,NRELInputManager,TrainOperation,TestOperation
@@ -11,7 +11,7 @@ import importlib
 import pandas as pd
 
 # CONFIGURATION MANAGER
-config_file_name = '/home/ycedres/Projects/PhD/wind/RNN-windPower/src/regressors/core/config.json'
+config_file_name = '/home/ycedres/Projects/RNN/RNN-windPower/src/regressors/core/config.json'
 config_manager = JSONConfigManager(filename=config_file_name)
 basedir = config_manager.get_input_basedir()
 filename = config_manager.get_input_filename()
@@ -48,9 +48,11 @@ description):
     experiment.save_error_estimators()
 
     experiment.save_experiment_descriptor(
-        config_manager.get_features_config(),
-        config_manager.get_train_config(name=type(regressor).__name__),
-        config_manager.get_model_config(name=type(regressor).__name__),
+        experiment_name=type(regressor).__name__,
+        features_config=config_manager.get_features_config(),
+        train_config=config_manager.get_train_config(name=type(regressor).__name__),
+        model_config=config_manager.get_model_config(name=type(regressor).__name__),
+        description=config_manager.get_experiment_description(name=type(regressor).__name__)
     )
 
 

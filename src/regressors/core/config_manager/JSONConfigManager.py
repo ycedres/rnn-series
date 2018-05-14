@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(0, '/home/ycedres/Projects/PhD/wind/RNN-windPower/src/regressors/core/config_manager')
+sys.path.insert(0, '/home/ycedres/Projects/RNN/RNN-windPower/src/regressors/core/config_manager/')
 
 from ConfigManager import ConfigManager
 import json
@@ -48,7 +48,11 @@ class JSONConfigManager(ConfigManager):
         return self._config['experiments'][name]["model_parameters"]
 
     def get_train_config(self,name):
-        return self._config['experiments'][name]["train_parameters"]    
+        return self._config['experiments'][name]["train_parameters"]
+
+
+    def get_experiment_description(self,name):
+        return self._config['experiments'][name]['description']
 
     def get_runner_config(self):
         pass
@@ -67,7 +71,7 @@ class JSONConfigManager(ConfigManager):
 
 if __name__ == "__main__":
 
-    mgr = JSONConfigManager("/home/ycedres/Projects/PhD/wind/RNN-windPower/src/regressors/core/config.json")
+    mgr = JSONConfigManager("/home/ycedres/Projects/RNN/RNN-windPower/src/regressors/core/config.json")
     #print(mgr.get_experiment_train_parameters(id="RLSTM001"))
 
     # [print(exp) for exp in mgr.get_experiments().items()]

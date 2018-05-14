@@ -310,6 +310,36 @@ class OutputManager(object):
         f.write(d)
         f.close()
 
+    def save_experiment_descriptor(self,experiment_name,features_config,train_config,
+                               model_config,errors,description):
+
+        directory = self._basedir + '/' + self._file_prefix + '_' + \
+        self._input_descriptor_string + '/'
+        filename = directory + 'description.json'
+
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        import json
+        jsonstr = "{"
+        jsonstr += "\"name\": \"" + experiment_name + "\","
+        jsonstr += "\"features_config\":" + json.dumps(features_config) + ","
+        jsonstr += "\"train_config\":" + json.dumps(train_config)  + ","
+        jsonstr += "\"model_config\":" + json.dumps(model_config)  + ","
+        jsonstr += "\"errors\":" + json.dumps(errors) + ","
+        jsonstr += "\"description\":" + json.dumps(description)
+
+        jsonstr +=  "}"
+
+        # from pprint import pprint
+        # pprint(jsonstr)
+
+        f = open(filename,"w")
+        f.write(jsonstr)
+
+
+
+
 
 #/////////////////////////////////////////////////////////////
 
@@ -393,6 +423,16 @@ class Experiment(object):
                                  self._output,
                                  self._input_manager.get_test_target()
             )
+
+    def save_experiment_descriptor(self,experiment_name,features_config,train_config,
+                                   model_config,description):
+        self._output_manager.save_experiment_descriptor(
+            experiment_name=experiment_name,
+            features_config=features_config,
+            train_config=train_config,
+            model_config=model_config,
+            errors=self.get_error_estimators(),
+            description=description)
 
 #/////////////////////////////////////////////////////////////
 
