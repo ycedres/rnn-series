@@ -168,12 +168,13 @@ class OutputManager(object):
         if option == 'print':
             print(self._data)
 
-    def set_output_config(self,save,basedir=None,file_prefix=None,
+    def set_output_config(self,save,basedir=None,file_prefix=None,horizon=None,
                           input_descriptor_string=None,
                           output_filename=None):
        self._save = save
        self._basedir = basedir
        self._file_prefix = file_prefix
+       self._horizon = horizon
        self._output_filename = output_filename
        self._input_descriptor_string = input_descriptor_string
 
@@ -323,6 +324,7 @@ class OutputManager(object):
         import json
         jsonstr = "{"
         jsonstr += "\"name\": \"" + experiment_name + "\","
+        jsonstr += "\"horizon\":" +  str(self._horizon)  + ","
         jsonstr += "\"features_config\":" + json.dumps(features_config) + ","
         jsonstr += "\"train_config\":" + json.dumps(train_config)  + ","
         jsonstr += "\"model_config\":" + json.dumps(model_config)  + ","

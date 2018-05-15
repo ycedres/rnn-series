@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(0, '/home/ycedres/Projects/RNN/RNN-windPower/src/regressors/core/')
+sys.path.insert(0, '/home/ycedres/Projects/PhD/wind/RNN-windPower/src/regressors/core/')
 
 from model_runner import Experiment,LocalRunner, \
 OutputManager,NRELInputManager,TrainOperation,TestOperation
@@ -11,7 +11,7 @@ import importlib
 import pandas as pd
 
 # CONFIGURATION MANAGER
-config_file_name = '/home/ycedres/Projects/RNN/RNN-windPower/src/regressors/core/config.json'
+config_file_name = '/home/ycedres/Projects/PhD/wind/RNN-windPower/src/regressors/core/config.json'
 config_manager = JSONConfigManager(filename=config_file_name)
 basedir = config_manager.get_input_basedir()
 filename = config_manager.get_input_filename()
@@ -62,7 +62,7 @@ description):
 if __name__ == "__main__":
 
     features = config_manager.get_features_config()
-    print(features)
+
     # name = file_config_manager.get_file_prefix('lstm_1')
     # name = 'lstm_3'
 
@@ -72,14 +72,17 @@ if __name__ == "__main__":
     has_been_plotted = False
     horizon_range = config_manager.get_horizon_range()
 
-    for expid,parameters in config_manager.get_experiments().items():
 
-        for horizon in (horizon_range["start"],horizon_range["end"]):
+    for expid,parameters in config_manager.get_experiments().items():
+        print(horizon_range["start"])
+        print(horizon_range["end"])
+        for horizon in range(horizon_range["start"],horizon_range["end"]):
 
             MClass = getattr(importlib.import_module("models.ml."+expid),expid)
             model = MClass()
-            model.set_batch_size(1024)
-            model.set_epochs(10)
+            train_parameters = config_manager.get_experiment_train_parameters(expid)
+            model.set_batch_size(train_parameters['batch_size'])
+            model.set_epochs(train_parameters['epochs'])
 
             input_descriptor_string = 'ws'+str(features['window_size']) + '_' + \
                               'h'+str(horizon) + '_' + \
@@ -125,6 +128,7 @@ if __name__ == "__main__":
                 basedir = config_manager.get_output_basedir(),
                 # file_prefix = file_config_manager.get_file_prefix(name),
                 file_prefix = expid,
+                horizon=horizon,
                 input_descriptor_string = input_descriptor_string,
                 output_filename = output_filename
             )

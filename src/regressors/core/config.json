@@ -3,14 +3,14 @@
 "data": {
 "basedir" : "/home/ycedres/Projects/PhD/wind/RNN-windPower/database/",
 "filename" : "windpark_Offshore_WA_OR_turbine_25915.csv",
-"output_basedir" : "/tmp/"
+"output_basedir" : "/tmp/rlstm"
 },
 
 "features" : {
 "window_size" : 6,
 "step_size" : 1,
 "padding" : 0,
-"horizon_range" : {"start":1,"end":2},
+"horizon_range" : {"start":1,"end":13},
 "method" : "sequential"
 },
 
@@ -21,9 +21,9 @@
 
 "train_parameters": {
   "batch_size": 1024,
-  "epochs": 200
+  "epochs": 150
 },
-"description": "Ruido gausiano aleatorio en la función de activación de la lstm (tanh)",
+"description": "Bottleneck layer. Ruido gausiano aleatorio en la función de activación de la lstm (tanh)",
 "model_parameters" : {}
 }
 

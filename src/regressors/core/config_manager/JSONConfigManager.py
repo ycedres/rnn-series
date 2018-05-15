@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(0, '/home/ycedres/Projects/RNN/RNN-windPower/src/regressors/core/config_manager/')
+sys.path.insert(0, '/home/ycedres/Projects/PhD/wind/RNN-windPower/src/regressors/core/config_manager/')
 
 from ConfigManager import ConfigManager
 import json
