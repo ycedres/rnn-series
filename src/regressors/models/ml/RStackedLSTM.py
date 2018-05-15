@@ -25,6 +25,8 @@ class RStackedLSTM(object):
 
         self._plot_title = 'lstm'
         self._reg = self._create_model(6, 1)
+        self._batch_size = 1024
+        self._epochs = 100        
 
     def config_exp_path(self,basedir=None,file_prefix=None,
                  input_descriptor_string=None):
@@ -32,6 +34,12 @@ class RStackedLSTM(object):
         self._basedir = basedir
         self._file_prefix = file_prefix
         self._input_descriptor_string = input_descriptor_string
+
+    def set_batch_size(self,batch_size):
+        self._batch_size = batch_size
+
+    def set_epochs(self,epochs):
+        self._epochs = epochs
 
     def train(self, features_train_set,
                     target_train_set,
@@ -55,7 +63,8 @@ class RStackedLSTM(object):
         model, history = self._fit_model(self._reg, x_train_lstm, y_train,
                                           x_val_lstm, y_val,
                                           exp_path=directory,
-                                          batch_size=1024, epochs=200)
+                                          batch_size=self._batch_size,
+                                          epochs=self._epochs)
 
     def test(self,features_test_set):
 
@@ -87,7 +96,7 @@ class RStackedLSTM(object):
 
         # Stack - RNN - LSTM
         x = LSTM(6, return_sequences=True, name='lstm-1')(normalize_input)
-        x = LSTM(5, name='lstm-2')(x)
+        x = LSTM(6, name='lstm-2')(x)
 
         # Fully-connect
         x = Dense(3,

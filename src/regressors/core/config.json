@@ -3,7 +3,7 @@
 "data": {
 "basedir" : "/home/ycedres/Projects/PhD/wind/RNN-windPower/database/",
 "filename" : "windpark_Offshore_WA_OR_turbine_25915.csv",
-"output_basedir" : "/tmp/rlstm"
+"output_basedir" : "/tmp/rstackedlstm/daily/"
 },
 
 "features" : {
@@ -11,19 +11,19 @@
 "step_size" : 1,
 "padding" : 0,
 "horizon_range" : {"start":1,"end":13},
-"method" : "sequential"
+"method" : "daily"
 },
 
 
 "experiments" : {
 
-"RLSTM" : {
+"RStackedLSTM" : {
 
 "train_parameters": {
   "batch_size": 1024,
   "epochs": 150
 },
-"description": "Bottleneck layer. Ruido gausiano aleatorio en la función de activación de la lstm (tanh)",
+"description": "Bottleneck layer a la salida de las LSTM.",
 "model_parameters" : {}
 }
 

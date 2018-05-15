@@ -107,14 +107,14 @@ class RLSTM(object):
 
         x = LSTM(6,
                  kernel_initializer='normal',
-                 activation='custom_activation',
+                 #activation='custom_activation',
                  name='lstm-layer')(normalize_input)
         # Fully-connect
-        x = Dense(3,
+        x = Dense(4,
                   kernel_initializer='normal',
                   activation='relu',
                   name='embudo-1')(x)
-        x = Dense(6,
+        x = Dense(2,
                   kernel_initializer='normal',
                   activation='relu',
                   name='embudo-2')(x)
