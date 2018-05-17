@@ -217,8 +217,8 @@ class OutputManager(object):
         ax.set_ylim(x_min+1, x_max+1)
         ax.plot((x_min, x_max), (x_min, x_max), lw=3, c='r')
         ax.scatter(x,y,c='b')
-        ax.set(xlabel='target', ylabel='prediction')
-        ax.set_title(title)
+        ax.set(xlabel='target: wind speed (m/s)', ylabel='prediction: wind speed (m/s)')
+        ax.set_title('RLTSM: ' + title)
         #plt.figure()
         # self._df_prediction.plot(ax=ax,
         #         x='prediction',
@@ -247,7 +247,7 @@ class OutputManager(object):
         x.index = y.index
         df = pd.concat([x,y],axis=1)
 
-        df.plot(figsize=(15,5))
+        df.plot(figsize=(15,5),title="RLSTM",legend=False)
         # plt.plot(x,y)
         if self._save:
 
