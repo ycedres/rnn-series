@@ -40,6 +40,9 @@ class JSONConfigManager(ConfigManager):
         else:
             return self._features_config
 
+    def get_window_range(self):
+        return self._config["features"]["window_range"]
+
     def get_horizon_range(self):
         return self._config["features"]["horizon_range"]
 

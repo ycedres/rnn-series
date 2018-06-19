@@ -24,7 +24,7 @@ class RLSTM(object):
             self._input_descriptor_string = input_descriptor_string
 
         self._plot_title = 'lstm'
-        self._reg = self._create_model(6, 1)
+        self._reg = self._create_model(10, 1)
         self._batch_size = 1024
         self._epochs = 100
 
@@ -34,6 +34,14 @@ class RLSTM(object):
         self._basedir = basedir
         self._file_prefix = file_prefix
         self._input_descriptor_string = input_descriptor_string
+
+
+    def configure(self,features_by_timestep):
+        self._reg = self._create_model(features_by_timestep , 1)
+
+    def configure_train(self,config):
+        self._batch_size = config['batch_size']
+        self._epochs = config['epochs']
 
     def set_batch_size(self,batch_size):
         self._batch_size = batch_size
@@ -70,7 +78,6 @@ class RLSTM(object):
 
         x_test = features_test_set.values.astype('float32')
         x_test_lstm = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 1))
-
         return self._reg.predict(x_test_lstm)
 
 
@@ -152,6 +159,11 @@ class RLSTM(object):
                       optimizer=opt,
                       metrics=['mae'])
 
+        print(x_train.shape)
+        print(x_train)
+        print(y_train.shape)
+        print(y_train)
+        print(model)
         history = model.fit(x_train,
                             y_train,
                             batch_size=batch_size,

@@ -11,6 +11,7 @@
 "step_size" : 1,
 "padding" : 0,
 "horizon_range" : {"start":1,"end":2},
+"window_range" : {"start":10,"end":20},
 "method" : "sequential"
 },
 
@@ -21,7 +22,7 @@
 
 "train_parameters": {
   "batch_size": 1024,
-  "epochs": 150
+  "epochs": 100
 },
 "description": "Bottleneck layer a la salida de las LSTM.",
 "model_parameters" : {}
