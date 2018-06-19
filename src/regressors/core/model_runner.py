@@ -3,6 +3,9 @@ sys.path.insert(0, '../')
 
 from crossvalidation.csv_input_manager import CSVInputManager
 from input_manager.nrel_input_manager import NRELInputManager
+from output_manager.output_manager import OutputManager
+from runner.runner import LocalRunner,TrainOperation,TestOperation
+
 from models.ml.KNNRegressor import KNNRegressor
 from models.ml.DecisionTreeRegressor import RDecisionTree
 from models.ml.RSupportVector import RSupportVector
@@ -15,335 +18,7 @@ from configparser import ConfigParser
 import pandas as pd
 import numpy as np
 import os
-# Models == Receivers
 
-
-
-# Invoker
-class Runner(object):
-    def __init__(self):
-        self._queue = []
-
-    #def history():
-    #    return self._history
-
-    def local_run(operation): #la operacion tiene al modelo como atributo
-        #self._history = self._history + (operation,)
-        #self._queue.append(operation)
-        operation.execute()
-
-class LocalRunner(Runner):
-    def __init__(self):
-        self._queue = []
-
-    def append(operation):
-        self._queue.append(operation)
-
-    def run_queue(operation):
-        pass
-
-    def run_operation(operation):
-        operation.excecute()
-
-# Command
-
-
-class Operation(object):
-    def __init__(self, model):
-        self._model = model
-
-# Specific Commands
-
-
-class TrainOperation(Operation):
-
-    def __init__(self, model):
-        self._model = model
-
-    def run(self, train_features,
-                  train_target,
-                  validation_features,
-                  validation_target):
-
-        self._model.train(train_features, train_target, validation_features,
-                          validation_target)
-
-
-class TestOperation(Operation):
-
-    def __init__(self, model):
-        self._model = model
-
-    def run(self, test_features):
-        return self._model.test(test_features)
-
-
-
-#/////////////////////////CONFIG MANAGER/////////////////////////
-#//Configuration Manager
-
-class ConfigManager:
-
-    def __init__(self):
-        self._model_config = None
-        self._features_config = None
-        self._data_config = None
-
-    def set_features_config(self,d):
-        self._features_config = d
-
-    def set_model_config(self,d):
-        self._model_config = d
-
-    def set_data_config(self,d):
-        self._data_config = d
-
-class FileConfigManager(ConfigManager):
-
-    def __init__(self,filename):
-        ConfigManager.__init__(self)
-        self._filename = filename
-        self._config = ConfigParser()
-        self._config.optionxform=str
-        self._config.read(filename)
-
-    def get_input_basedir(self):
-        return self._config.get('data', 'basedir')
-
-    def get_output_basedir(self):
-        return self._config.get('data', 'output_basedir')
-
-    def get_input_filename(self):
-        return self._config.get('data', 'filename')
-
-    def get_file_prefix(self,name):
-        return self._config.get(name,'file_prefix')
-
-    #Returns {'train':{(opt1,val1),(opt2,val2)},'test':{(opt1,val1),(opt2,val2)}}
-    def get_operation_config(self):
-        pass
-
-    def get_features_config(self):
-        if self._features_config is None:
-            return dict(self._config.items('features'))
-        else:
-            return self._features_config
-
-    #Returns {'knn':{(opt1,val1),(opt2,val2)},'lstm':{(opt1,val1),(opt2,val2)}}
-    def get_model_config(self,name):
-        config = {model[0]:self._config.items(model[0]) for model in self._config.items('models') if model[1]=='true'}
-
-        return dict(config[name])
-
-    def get_runner_config(self):
-        pass
-
-    def save_config():
-        pass
-
-    def write_cfg_file(self,filename,name):
-        d = self.get_model_config(name)
-        f = open(filename,'w')
-        import json
-        d = json.dumps(d)
-        f.write(d)
-        f.close()
-
-    #[{model[0]:config.items(model[0])} for model in config.items('models') if model[1]=='true']
-    #d={model[0]:config.items(model[0]) for model in config.items('models') if model[1]=='true'}
-
-#/////////////////////////INPUT/OUTPUT/////////////////////////
-
-#class InputManager():
-
-class OutputManager(object):
-
-    def __init__(self,output_file=''):
-        self._df_prediction = None
-        pass
-
-    def save(self,option='file'):
-        if option == 'file':
-            pass
-        if option == 'print':
-            print(self._data)
-
-    def set_output_config(self,save,basedir=None,file_prefix=None,horizon=None,
-                          input_descriptor_string=None,
-                          output_filename=None):
-       self._save = save
-       self._basedir = basedir
-       self._file_prefix = file_prefix
-       self._horizon = horizon
-       self._output_filename = output_filename
-       self._input_descriptor_string = input_descriptor_string
-
-    def print_output(self,data):
-        print(data)
-
-    def plot_scatter(self):
-        x = self._df_prediction['target']
-        y = self._df_prediction['prediction']
-
-        plt.xlabel('prediction')
-        plt.ylabel('target')
-        plt.scatter(x,y,c='b')
-
-        if self._save:
-
-            directory = self._basedir + '/' + self._file_prefix + '/'
-            filename = directory + 'scatter.png'
-
-            if not os.path.exists(directory):
-                os.makedirs(directory)
-            plt.savefig(filename)
-        else:
-            plt.show(block=False)
-
-    def plot_scatter_diagonal(self,title):
-        # df_x = pd.DataFrame(x)
-        # df_x.index = y.index
-        # df = pd.concat([df_x,y],axis=1)
-        # df.columns = ['a','b']
-        x = self._df_prediction['target']
-        y = self._df_prediction['prediction']
-
-        f, ax = plt.subplots(1,1,figsize=(10,10))
-        x_min = x.min()
-        x_max = x.max()
-        y_min = y.min()
-        y_max = y.max()
-        ax.set_xlim(x_min+1, x_max+1)
-        ax.set_ylim(x_min+1, x_max+1)
-        ax.plot((x_min, x_max), (x_min, x_max), lw=3, c='r')
-        ax.scatter(x,y,c='b')
-        ax.set(xlabel='target: wind speed (m/s)', ylabel='prediction: wind speed (m/s)')
-        ax.set_title('RLTSM: ' + title)
-        #plt.figure()
-        # self._df_prediction.plot(ax=ax,
-        #         x='prediction',
-        #         y='target',
-        #         kind='scatter',
-        #         c='b'
-        #         )
-
-        if self._save:
-
-            directory = self._basedir + '/' + self._file_prefix + '_' + \
-            self._input_descriptor_string + '/'
-
-            filename = directory + 'scatter.png'
-
-            if not os.path.exists(directory):
-                os.makedirs(directory)
-            plt.savefig(filename)
-        else:
-            plt.show(block=False)
-
-
-
-    def plot(self,x,y):
-        x = pd.DataFrame(x)
-        x.index = y.index
-        df = pd.concat([x,y],axis=1)
-
-        df.plot(figsize=(15,5),title="RLSTM",legend=False)
-        # plt.plot(x,y)
-        if self._save:
-
-            directory = self._basedir + '/' + self._file_prefix + '_' + \
-            self._input_descriptor_string + '/'
-
-            filename = directory + 'serie.png'
-
-            if not os.path.exists(directory):
-                os.makedirs(directory)
-            plt.savefig(filename)
-        else:
-            plt.show(block=False)
-
-
-    def set_df_prediction(self,x:np.array,y:pd.DataFrame):
-        df_x = pd.DataFrame(x)
-        df_x.index = y.index
-        self._df_prediction = pd.concat([df_x,y],axis=1)
-        self._df_prediction.columns = ['prediction','target']
-        if self._save:
-
-            directory = self._basedir + '/' + self._file_prefix + '_' + \
-            self._input_descriptor_string + '/'
-            filename = directory + self._output_filename
-
-            if not os.path.exists(directory):
-                os.makedirs(directory)
-
-            self._df_prediction.to_csv(filename,sep=';')
-
-
-    def get_test_mae(self):
-        self._df_prediction['mae'] = np.abs(self._df_prediction.prediction -
-                                      self._df_prediction.target)
-        return  self._df_prediction.mae.sum() / len(self._df_prediction.mae)
-
-    def get_test_mse(self):
-        self._df_prediction['mse'] = np.power(self._df_prediction.prediction -
-                                       self._df_prediction.target, 2)
-        return self._df_prediction.mse.sum() / len(self._df_prediction.mse)
-
-    def get_test_rmse(self):
-        return np.sqrt(self.get_test_mse())
-
-    def get_test_r2(self,reference_mse):
-        return (reference_mse - self.get_test_mse()) / reference_mse
-
-    def save_error_estimators(self,d):
-        directory = self._basedir + '/' + self._file_prefix + '_' + \
-        self._input_descriptor_string + '/'
-        filename = directory + 'errors.json'
-
-        if not os.path.exists(directory):
-
-            os.makedirs(directory)
-
-        f = open(filename,'w')
-        import json
-        d = json.dumps(d)
-        f.write(d)
-        f.close()
-
-    def save_experiment_descriptor(self,experiment_name,features_config,train_config,
-                               model_config,errors,description):
-
-        directory = self._basedir + '/' + self._file_prefix + '_' + \
-        self._input_descriptor_string + '/'
-        filename = directory + 'description.json'
-
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-
-        import json
-        jsonstr = "{"
-        jsonstr += "\"name\": \"" + experiment_name + "\","
-        jsonstr += "\"horizon\":" +  str(self._horizon)  + ","
-        jsonstr += "\"features_config\":" + json.dumps(features_config) + ","
-        jsonstr += "\"train_config\":" + json.dumps(train_config)  + ","
-        jsonstr += "\"model_config\":" + json.dumps(model_config)  + ","
-        jsonstr += "\"errors\":" + json.dumps(errors) + ","
-        jsonstr += "\"description\":" + json.dumps(description)
-
-        jsonstr +=  "}"
-
-        # from pprint import pprint
-        # pprint(jsonstr)
-
-        f = open(filename,"w")
-        f.write(jsonstr)
-
-
-
-
-
-#/////////////////////////////////////////////////////////////
 
 #Client
 class Experiment(object):
@@ -396,6 +71,98 @@ class Experiment(object):
                              self._input_manager.get_test_target()
                              )
 
+    def launch(self):
+
+        for expid,parameters in config_manager.get_experiments().items():
+            train_parameters = config_manager.train_parameters(expid)
+            model_parameters = config_manager.model_parameters(expid)
+            description = config_manager.description(expid)
+            self._launch_regressor(expid,train_parameters,model_parameters,description)
+
+    def _launch_regressor(self,expid,train_parameters,model_parameters,description):
+
+        MClass = getattr(importlib.import_module("models.ml."+expid),expid)
+        model = MClass()
+        self._model.configure(model_parameters)
+        self._model.configure_train(train_parameters)
+        self._model.description = description
+
+        window_range = self._config_manager.window_range
+        horizon_range = self._config_manager.horizon_range
+
+        model.config_exp_path(basedir = config_manager.get_output_basedir(),
+                    #file_prefix = file_config_manager.get_file_prefix(name),
+                    file_prefix = expid,
+                    input_descriptor_string = input_descriptor_string)
+
+        for ws in window_range:
+            for hr in horizon_range:
+
+                # Cadena que describe el formato de la entrada
+                input_descriptor_string = 'ws'+str(ws) + '_' + \
+                              'h'+str(hr) + '_' + \
+                              'p'+str(features['padding']) + '_' + \
+                              'sz'+str(features['step_size']) + '_' + \
+                              features['method']
+
+                if not has_been_plotted:
+                    model.plot_model()
+
+                output_filename = input_descriptor_string + '.csv'
+                output_filename_dataframe = input_descriptor_string + '_dataframe' + '.csv'
+                output_filename_path = config_manager.get_output_basedir() + output_filename
+                output_filename_path_dataframe = config_manager.get_output_basedir() + output_filename_dataframe
+
+                input_manager.configure_features_generator(
+                    window_size=int(features['window_size']),
+                    horizon=horizon,
+                    padding=int(features['padding']),
+                    step_size=int(features['step_size']),
+                    write_csv_file=True,
+                    output_csv_file=output_filename_path_dataframe,
+                    #method='sequential',
+                    method=features['method']
+                )
+
+                if os.path.exists(output_filename_path_dataframe):
+                    parse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
+                    df = pd.read_csv(output_filename_path_dataframe,sep=';',date_parser=parse,index_col=0)
+                    input_manager.load_dataframe(df)
+                else:
+                    input_manager.load_and_split()
+
+                output_manager.set_output_config(
+                    save = True,
+                    basedir = config_manager.get_output_basedir(),
+                    # file_prefix = file_config_manager.get_file_prefix(name),
+                    file_prefix = expid,
+                    horizon=horizon,
+                    input_descriptor_string = input_descriptor_string,
+                    output_filename = output_filename
+                )
+
+                train_operation = TrainOperation(regressor)
+                experiment.run_train_operation(train_operation)
+
+                test_operation = TestOperation(regressor)
+                experiment.run_test_operation(test_operation)
+
+                #experiment.generate_report()
+
+                experiment.plot(type='scatter')
+                experiment.plot()
+
+                experiment.save_error_estimators()
+
+                experiment.save_experiment_descriptor(
+                    experiment_name=type(regressor).__name__,
+                    features_config=config_manager.get_features_config(),
+                    train_config=config_manager.get_train_config(name=type(regressor).__name__),
+                    model_config=config_manager.get_model_config(name=type(regressor).__name__),
+                    description=config_manager.get_experiment_description(name=type(regressor).__name__)
+                )
+
+
     def get_error_estimators(self):
         reference_mse = self._input_manager.get_reference_rmse()
         return {'mse':self._output_manager.get_test_mse(),
@@ -435,6 +202,7 @@ class Experiment(object):
             model_config=model_config,
             errors=self.get_error_estimators(),
             description=description)
+
 
 #/////////////////////////////////////////////////////////////
 
