@@ -3,22 +3,22 @@
 "data": {
 "basedir" : "/home/ycedres/Projects/PhD/wind/RNN-windPower/database/",
 "filename" : "windpark_Offshore_WA_OR_turbine_25915.csv",
-"output_basedir" : "/tmp/rltsm/sequential"
+"output_basedir" : "/tmp/rlstm_noise/sequential"
 },
 
 "features" : {
-"window_size" : 6,
+"window_size" : 15,
 "step_size" : 1,
 "padding" : 0,
-"horizon_range" : {"start":1,"end":2},
-"window_range" : {"start":10,"end":20},
+"horizon_range" : {"start":1,"end":1},
+"window_range" : {"start":10,"end":10},
 "method" : "sequential"
 },
 
 
 "experiments" : {
 
-"RLSTM" : {
+"RLSTMNoise" : {
 
 "train_parameters": {
   "batch_size": 1024,

@@ -11,7 +11,7 @@ from keras.callbacks import TensorBoard
 
 import os
 
-class RLSTM(object):
+class RLSTMNoise(object):
 
     def __init__(self, config=None,basedir=None,file_prefix=None,
                  input_descriptor_string=None):
@@ -81,7 +81,6 @@ class RLSTM(object):
         return self._reg.predict(x_test_lstm)
 
 
-
     def _create_model(self,time_step, feature_by_timestep):
         # Input layer
         input = Input((time_step,
@@ -106,25 +105,45 @@ class RLSTM(object):
 
             return (x * K.cast(isPositive,tf.float32)) + noise
 
+
+
         def custom_activation(x):
             #return (K.tanh(x)+relu_noise(x))
             return (K.tanh(x))
             #return (K.log(K.sigmoid(x)))
-        get_custom_objects().update({'custom_activation': Activation(custom_activation)})
 
-        x = LSTM(6,
+        def hard_tanh(x):
+            return K.max(K.min(x,1),-1)
+
+        def d(x,alpha):
+            return (-1 * K.sign(x)) * K.sign(1-alpha)
+
+        def noise_deviation(x,c,p):
+            return K.square(c*(p*-0.5))
+
+        def noisy_activation_tahn(x):
+            alpha = 0.7
+            c = 0.2
+            p = 0.3
+            print("NOISSSSSSSSSSSSSSSSSSSSSSSSSEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
+            return alpha * K.tanh(x) + (1-alpha) * hard_tanh(x) + d(x,alpha) * noise_deviation(x,c,p)
+
+
+        get_custom_objects().update({'noisy_activation_tahn': Activation(noisy_activation_tahn)})
+
+        x = LSTM(10,
                  kernel_initializer='normal',
-                 #activation='custom_activation',
+                 activation='noisy_activation_tahn',
                  name='lstm-layer')(normalize_input)
         # Fully-connect
-        x = Dense(3,
+        x = Dense(5,
                   kernel_initializer='normal',
                   activation='relu',
-                  name='bottleneck-1')(x)
-        x = Dense(6,
+                  name='embudo-1')(x)
+        x = Dense(10,
                   kernel_initializer='normal',
                   activation='relu',
-                  name='bottleneck-2')(x)
+                  name='embudo-2')(x)
         # x = Dense(5,
         #           kernel_initializer='normal',
         #           activation='relu',
@@ -158,7 +177,7 @@ class RLSTM(object):
         model.compile(loss='mean_squared_error',
                       optimizer=opt,
                       metrics=['mae'])
-
+        print("fit NOISSSSSSSSSSSSSSSSSSSSSSSSSEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
         history = model.fit(x_train,
                             y_train,
                             batch_size=batch_size,

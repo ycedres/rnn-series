@@ -95,8 +95,15 @@ class Experiment(object):
         features = self._config_manager.get_features_config()
         window_range = (window_range['start'],window_range['end'])
         horizon_range = (horizon_range['start'],horizon_range['end'])
-        for ws in window_range:
-            for hr in horizon_range:
+        print(window_range)
+        print(type(window_range))
+        print(horizon_range)
+        for ws in range(window_range[0],window_range[1]+1):
+            for hr in range(horizon_range[0],horizon_range[1]+1):
+                print("----------------------------------------------------")
+                print(ws)
+                print(hr)
+                print("----------------------------------------------------")
                 self._model.configure(features_by_timestep=ws)
                 # Cadena que describe el formato de la entrada
                 input_descriptor_string = 'ws'+str(ws) + '_' + \

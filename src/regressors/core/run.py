@@ -1,5 +1,3 @@
-#!/home/ycedres/miniconda3/envs/py36/bin/python
-
 import sys
 sys.path.insert(0, '/home/ycedres/Projects/PhD/wind/RNN-windPower/src/regressors/core/')
 
