@@ -122,11 +122,15 @@ class RLSTMNoise(object):
             return K.square(c*(p*-0.5))
 
         def noisy_activation_tahn(x):
+            # alpha = 0.7
+            # c = 0.2
+            # p = 0.3
             alpha = 0.7
             c = 0.2
             p = 0.3
+            noise = K.random_normal()
             print("NOISSSSSSSSSSSSSSSSSSSSSSSSSEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
-            return alpha * K.tanh(x) + (1-alpha) * hard_tanh(x) + d(x,alpha) * noise_deviation(x,c,p)
+            return alpha * K.tanh(x) + (1-alpha) * hard_tanh(x) + d(x,alpha) * noise_deviation(x,c,p) * K.abs(noise)
 
 
         get_custom_objects().update({'noisy_activation_tahn': Activation(noisy_activation_tahn)})
