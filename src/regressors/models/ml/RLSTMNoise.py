@@ -7,6 +7,7 @@ from keras.layers import Dropout
 from keras.layers import BatchNormalization
 from keras.optimizers import Adam
 from keras.utils import plot_model
+#from keras.utils import apply_modifications
 from keras.callbacks import TensorBoard
 
 import os
@@ -76,6 +77,27 @@ class RLSTMNoise(object):
 
     def test(self,features_test_set):
 
+        def NHardTanhSatExpectation(x,
+                         use_noise=True,
+                         c=0.25):
+
+            HardTanh = lambda x: tf.minimum(tf.maximum(x, -1.), 1.)
+
+            threshold = 1.001
+
+            #noise = K.random_normal(shape=K.shape(x),mean=0.0, stddev=1.0)
+            noise = 0.0
+
+            test = K.cast(K.greater(K.abs(x) , threshold), dtype='float32')
+            res = test * HardTanh(x + c * noise) + (1. - test) * HardTanh(x)
+            return res
+
+        print("TEEEEEEEEEEEEEEEEEEEEEEEEST")
+        self._reg.layers[2].activation = NHardTanhSatExpectation
+        #apply_modifications(self._reg)
+        #print(self._reg.summary())
+        print(type(self._reg.layers))
+        [print(layer.activation) for layer in self._reg.layers if hasattr(layer,'activation')]
         x_test = features_test_set.values.astype('float32')
         x_test_lstm = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 1))
         return self._reg.predict(x_test_lstm)
@@ -133,7 +155,23 @@ class RLSTMNoise(object):
             return alpha * K.tanh(x) + (1-alpha) * hard_tanh(x) + d(x,alpha) * noise_deviation(x,c,p) * K.abs(noise)
 
 
-        get_custom_objects().update({'noisy_activation_tahn': Activation(noisy_activation_tahn)})
+        def NHardTanhSat(x,
+                         use_noise=True,
+                         c=0.25):
+
+            HardTanh = lambda x: tf.minimum(tf.maximum(x, -1.), 1.)
+
+            threshold = 1.001
+
+            noise = K.random_normal(shape=K.shape(x),mean=0.0, stddev=1.0)
+
+            test = K.cast(K.greater(K.abs(x) , threshold), dtype='float32')
+            res = test * HardTanh(x + c * noise) + (1. - test) * HardTanh(x)
+            return res
+
+
+        #get_custom_objects().update({'noisy_activation_tahn': Activation(noisy_activation_tahn)})
+        get_custom_objects().update({'noisy_activation_tahn': Activation(NHardTanhSat)})
 
         x = LSTM(10,
                  kernel_initializer='normal',
