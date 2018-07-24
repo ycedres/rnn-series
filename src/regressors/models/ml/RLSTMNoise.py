@@ -12,6 +12,32 @@ from keras.callbacks import TensorBoard
 
 import os
 
+
+from keras import backend as K
+from keras.engine.topology import Layer
+
+class MyLayer(LSTM):
+
+    #def __init__(self, output_dim, **kwargs):
+    def __init__(self, units, **kwargs):
+        #self.output_dim = output_dim
+        super(MyLayer, self).__init__(units=units,**kwargs)
+
+    def build(self, input_shape):
+        # Create a trainable weight variable for this layer.
+        # self.kernel = self.add_weight(name='kernel',
+        #                               shape=(input_shape[1], self.output_dim),
+        #                               initializer='uniform',
+        #                               trainable=True)
+        super(MyLayer, self).build(input_shape)  # Be sure to call this at the end
+
+    def call(self, x):
+        #return K.dot(x, self.kernel)
+        return super(MyLayer,self).call(x)
+
+    # def compute_output_shape(self, input_shape):
+    #     return (input_shape[0], self.output_dim)
+
 class RLSTMNoise(object):
 
     def __init__(self, config=None,basedir=None,file_prefix=None,
@@ -173,9 +199,13 @@ class RLSTMNoise(object):
         #get_custom_objects().update({'noisy_activation_tahn': Activation(noisy_activation_tahn)})
         get_custom_objects().update({'noisy_activation_tahn': Activation(NHardTanhSat)})
 
-        x = LSTM(10,
+        # x = LSTM(10,
+        #          kernel_initializer='normal',
+        #          #activation='noisy_activation_tahn',
+        #          name='lstm-layer')(normalize_input)
+        x = MyLayer(units=10,
                  kernel_initializer='normal',
-                 activation='noisy_activation_tahn',
+                 #activation='noisy_activation_tahn',
                  name='lstm-layer')(normalize_input)
         # Fully-connect
         x = Dense(5,
