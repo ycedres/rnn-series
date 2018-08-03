@@ -6,25 +6,36 @@ from keras.layers import LSTM
 from keras.layers import Dropout
 from keras.layers import BatchNormalization
 from keras.optimizers import Adam
-from keras.utils import plot_model
+# from keras.utils import plot_model
 #from keras.utils import apply_modifications
 from keras.callbacks import TensorBoard
-
+from keras.layers import Activation
+from keras.utils.generic_utils import get_custom_objects
 import os
-
+import tensorflow as tf
 
 from keras import backend as K
 from keras.engine.topology import Layer
+
+
 
 class MyLayer(LSTM):
 
     #def __init__(self, output_dim, **kwargs):
     def __init__(self, units, **kwargs):
-        #self.output_dim = output_dim
-        super(MyLayer, self).__init__(units=units,**kwargs)
+        self.p = None
+        get_custom_objects().update({'noisy_activation_tahn': Activation(self.NHardTanhSat)})
+        super(MyLayer, self).__init__(units=units,activation='noisy_activation_tahn',**kwargs)
+        #super(MyLayer, self).__init__(units=units, **kwargs)
 
     def build(self, input_shape):
         # Create a trainable weight variable for this layer.
+        with open('/tmp/somefile.txt', 'a') as the_file:
+            the_file.write('p: {}\n'.format(input_shape))
+        self.p = self.add_weight(name='p',
+                                      shape=(1,10),
+                                      initializer='uniform',
+                                      trainable=True)
         # self.kernel = self.add_weight(name='kernel',
         #                               shape=(input_shape[1], self.output_dim),
         #                               initializer='uniform',
@@ -36,7 +47,21 @@ class MyLayer(LSTM):
         return super(MyLayer,self).call(x)
 
     # def compute_output_shape(self, input_shape):
-    #     return (input_shape[0], self.output_dim)
+    #     return (input_shape[0], 10)
+    #@staticmethod
+    def NHardTanhSat(self,x,
+                     c=0.25):
+
+        HardTanh = lambda x: tf.minimum(tf.maximum(x, -1.), 1.)
+
+        threshold = 1.001
+
+        noise = K.random_normal(shape=K.shape(x),mean=0.0, stddev=1.0)
+        # with open('/tmp/somefile.txt', 'a') as the_file:
+        #     the_file.write('p: {}\n'.format(self.p))
+        test = K.cast(K.greater(K.abs(x) , threshold), dtype='float32')
+        res = test * HardTanh(x + c * noise) + (1. - test) * HardTanh(x) + self.p
+        return res
 
 class RLSTMNoise(object):
 
@@ -230,11 +255,11 @@ class RLSTMNoise(object):
         model = Model(inputs=input, outputs=output)
         model.summary()
 
-        plot_model(model,
-                   to_file='{0}.png'.format(self._plot_title),
-                   show_shapes=True,
-                   show_layer_names=True,
-                   rankdir='LR')
+        # plot_model(model,
+        #            to_file='{0}.png'.format(self._plot_title),
+        #            show_shapes=True,
+        #            show_layer_names=True,
+        #            rankdir='LR')
 
         return model
 
@@ -269,11 +294,11 @@ class RLSTMNoise(object):
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        plot_model(self._reg,
-                   to_file=directory+'{0}.png'.format(self._plot_title),
-                   show_shapes=True,
-                   show_layer_names=True,
-                   rankdir='LR')
+        # plot_model(self._reg,
+        #            to_file=directory+'{0}.png'.format(self._plot_title),
+        #            show_shapes=True,
+        #            show_layer_names=True,
+        #            rankdir='LR')
 
 
 if __name__ == '__main__':
