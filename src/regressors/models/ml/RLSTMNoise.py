@@ -24,7 +24,8 @@ class MyLayer(LSTM):
     #def __init__(self, output_dim, **kwargs):
     def __init__(self, units, **kwargs):
         self.p = None
-        get_custom_objects().update({'noisy_activation_tahn': Activation(self.NHardTanhSat)})
+        #get_custom_objects().update({'noisy_activation_tahn': Activation(self.NHardTanhSat)})
+        get_custom_objects().update({'noisy_activation_tahn': Activation(self.NTanhP)})
         super(MyLayer, self).__init__(units=units,activation='noisy_activation_tahn',**kwargs)
         #super(MyLayer, self).__init__(units=units, **kwargs)
 
@@ -62,6 +63,56 @@ class MyLayer(LSTM):
         test = K.cast(K.greater(K.abs(x) , threshold), dtype='float32')
         res = test * HardTanh(x + c * noise) + (1. - test) * HardTanh(x) + self.p
         return res
+
+    def NTanhP(self,x,
+               use_noise=tf.constant(False, dtype=tf.bool),
+               alpha=1.15,
+               c=0.5,
+               noise=None,
+               clip_output=False,
+               half_normal=False):
+        """
+        Noisy Hard Tanh Units: NAN with learning p
+        ----------------------------------------------------
+        Arguments:
+            x: tensorflow tensor variable, input of the function.
+            p: tensorflow variable, a vector of parameters for p.
+            use_noise: bool, whether to add noise or not to the activations, this is in particular
+            useful for the test time, in order to disable the noise injection.
+            c: float, standard deviation of the noise
+            alpha: float, the leakage rate from the linearized function to the nonlinear one.
+            half_normal: bool, whether the noise should be sampled from half-normal or
+            normal distribution.
+        """
+        HardTanh = lambda x: tf.minimum(tf.maximum(x, -1.), 1.)
+
+        if not noise:
+            noise = tf.random_normal(tf.shape(x), mean=0.0, stddev=1.0, dtype=tf.float32)
+
+        signs = tf.sign(x)
+        delta = HardTanh(x) - x
+
+        scale = c * (tf.sigmoid(self.p * delta) - 0.5) ** 2
+        if alpha > 1.0 and half_normal:
+            scale *= -1.0
+
+        zeros = tf.zeros(tf.shape(x), dtype=tf.float32, name=None)
+        rn_noise = tf.random_normal(tf.shape(x), mean=0.0, stddev=1.0, dtype=tf.float32)
+
+        def noise_func():
+            return tf.abs(rn_noise) if half_normal else zeros
+
+        def zero_func():
+            return zeros + 0.797 if half_normal else zeros
+
+        noise = tf.cond(use_noise, noise_func, zero_func)
+
+        res = alpha * HardTanh(x) + (1. - alpha) * x - signs * scale * noise
+
+        if clip_output:
+            return HardTanh(res)
+        return res
+
 
 class RLSTMNoise(object):
 
