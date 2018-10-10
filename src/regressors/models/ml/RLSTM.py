@@ -53,7 +53,7 @@ class RLSTM(object):
                     target_train_set,
                     features_validation_set,
                     target_validation_set):
-
+        print("TRAAAAAAAAAAAAAAAAAAAAAAAIN")
         x_train = features_train_set.values.astype('float32')
         y_train = target_train_set.values
         x_val = features_validation_set.values.astype('float32')
@@ -78,6 +78,10 @@ class RLSTM(object):
 
         x_test = features_test_set.values.astype('float32')
         x_test_lstm = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 1))
+        # print("TEEEEEEEEEEEEEEEEEEEEEST")
+        # print(self._reg.layers)
+        # import sys
+        # sys.exit()
         return self._reg.predict(x_test_lstm)
 
 
@@ -112,19 +116,19 @@ class RLSTM(object):
             #return (K.log(K.sigmoid(x)))
         get_custom_objects().update({'custom_activation': Activation(custom_activation)})
 
-        x = LSTM(6,
+        x = LSTM(20,
                  kernel_initializer='normal',
-                 #activation='custom_activation',
+                 activation='relu',
                  name='lstm-layer')(normalize_input)
         # Fully-connect
-        x = Dense(3,
-                  kernel_initializer='normal',
-                  activation='relu',
-                  name='bottleneck-1')(x)
-        x = Dense(6,
-                  kernel_initializer='normal',
-                  activation='relu',
-                  name='bottleneck-2')(x)
+        # x = Dense(10,
+        #           kernel_initializer='normal',
+        #           activation='relu',
+        #           name='bottleneck-1')(x)
+        # x = Dense(5,
+        #           kernel_initializer='normal',
+        #           activation='relu',
+        #           name='bottleneck-2')(x)
         # x = Dense(5,
         #           kernel_initializer='normal',
         #           activation='relu',
