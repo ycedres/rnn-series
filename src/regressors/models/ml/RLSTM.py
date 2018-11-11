@@ -116,7 +116,12 @@ class RLSTM(object):
             #return (K.log(K.sigmoid(x)))
         get_custom_objects().update({'custom_activation': Activation(custom_activation)})
 
-        x = LSTM(20,
+        # x = Dense(45,
+        #           kernel_initializer='normal',
+        #           activation='relu',
+        #           name='bottleneck-2')(normalize_input)
+
+        x = LSTM(90,
                  kernel_initializer='normal',
                  activation='relu',
                  name='lstm-layer')(normalize_input)

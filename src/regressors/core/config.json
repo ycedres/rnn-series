@@ -10,8 +10,8 @@
 "window_size" : 15,
 "step_size" : 1,
 "padding" : 0,
-"horizon_range" : {"start":1,"end":1},
-"window_range" : {"start":10,"end":10},
+"horizon_range" : {"start":1,"end":12},
+"window_range" : {"start":10,"end":20},
 "method" : "sequential"
 },
 
@@ -25,7 +25,10 @@
   "epochs": 100
 },
 "description": "Bottleneck layer a la salida de las LSTM.",
-"model_parameters" : {}
+"model_parameters" : {
+  "input_shape": {"0":0,"1":10}
+}
+
 }
 
 
