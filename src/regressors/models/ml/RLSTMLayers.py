@@ -3,11 +3,12 @@ from keras.models import Model
 from keras.layers import Input
 from keras.layers import Dense
 from keras.layers import LSTM
+from keras.layers import LeakyReLU
 from keras.layers import Add, Lambda
 from keras.layers import Dropout
 from keras.layers import BatchNormalization
 from keras.optimizers import Adam
-from keras.utils import plot_model
+#from keras.utils import plot_model
 from keras.callbacks import TensorBoard
 from .AbstractModel import AbstractModel
 from keras.layers import Conv1D,GlobalAveragePooling1D, MaxPooling1D
@@ -90,19 +91,22 @@ class RLSTMLayers(AbstractModel):
 
 
     def _create_model(self,time_step, feature_by_timestep):
+
+        lrelu = LeakyReLU(alpha=0.1)
+
         # Input layer
         input = Input((time_step,
                        feature_by_timestep),
                        dtype='float32',
                        name='input-layer')
         #normalize_input = BatchNormalization(name='normalize-input')(input)
-        x = Conv1D(50, 1, activation='relu', input_shape=(time_step, feature_by_timestep))(input)
-        x = Conv1D(50, 1, activation='relu', input_shape=(time_step, feature_by_timestep))(x)
+        x = Conv1D(50, 1, activation=lrelu, input_shape=(time_step, feature_by_timestep))(input)
+        x = Conv1D(50, 1, activation=lrelu, input_shape=(time_step, feature_by_timestep))(x)
         #Timesteps x número de filtros (timesteps x features) entran a la LSTM
         print("@@@@@@@@@@@@@@@@@@ÚLTIMA CONV1D: ",x)
         x = LSTM(90,
                  kernel_initializer='normal',
-                 activation='relu',
+                 activation=lrelu,
                  name='lstm-layer')(x)
 
         print("@@@@@@@@@@@@@@@@@@LSTM: ", x)
@@ -110,12 +114,12 @@ class RLSTMLayers(AbstractModel):
         #x = Dropout(rate=0.2)(x)
         x = Dense(50,
                        kernel_initializer='normal',
-                       activation='relu',
+                       activation=lrelu,
                        name='output-layer-1')(x)
         print("@@@@@@@@@@@@@@@@@@DENSA 1: ", x)
         x = Dense(50,
                        kernel_initializer='normal',
-                       activation='relu',
+                       activation=lrelu,
                        name='output-layer-2')(x)
         print("@@@@@@@@@@@@@@@@@@DENSA 2: ", x)
         x = Dense(1,
@@ -131,11 +135,11 @@ class RLSTMLayers(AbstractModel):
         model = Model(inputs=input, outputs=output)
         model.summary()
 
-        plot_model(model,
-                   to_file='{0}.png'.format(self._plot_title),
-                   show_shapes=True,
-                   show_layer_names=True,
-                   rankdir='LR')
+        # plot_model(model,
+        #            to_file='{0}.png'.format(self._plot_title),
+        #            show_shapes=True,
+        #            show_layer_names=True,
+        #            rankdir='LR')
 
         return model
 
@@ -170,11 +174,11 @@ class RLSTMLayers(AbstractModel):
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        plot_model(self._reg,
-                   to_file=directory+'{0}.png'.format(self._plot_title),
-                   show_shapes=True,
-                   show_layer_names=True,
-                   rankdir='LR')
+        # plot_model(self._reg,
+        #            to_file=directory+'{0}.png'.format(self._plot_title),
+        #            show_shapes=True,
+        #            show_layer_names=True,
+        #            rankdir='LR')
 
 
 if __name__ == '__main__':
