@@ -3,22 +3,22 @@
 "data": {
 "basedir" : "/home/ycedres/Projects/PhD/wind/RNN-windPower/database/",
 "filename" : "windpark_Offshore_WA_OR_turbine_25915.csv",
-"output_basedir" : "/tmp/rlstm/sequential"
+"output_basedir" : "/tmp/rlstmlayers/sequential"
 },
 
 "features" : {
 "window_size" : 15,
 "step_size" : 1,
 "padding" : 0,
-"horizon_range" : {"start":1,"end":12},
-"window_range" : {"start":10,"end":20},
+"horizon_range" : {"start":1,"end":1},
+"window_range" : {"start":100,"end":100},
 "method" : "sequential"
 },
 
 
 "experiments" : {
 
-"RLSTM" : {
+"RLSTMLayers" : {
 
 "train_parameters": {
   "batch_size": 1024,
@@ -26,7 +26,9 @@
 },
 "description": "Bottleneck layer a la salida de las LSTM.",
 "model_parameters" : {
-  "input_shape": {"0":0,"1":10}
+  "input_shape": {"0":0,"1":10},
+  "timesteps": 100,
+  "features_by_timestep": 1
 }
 
 }

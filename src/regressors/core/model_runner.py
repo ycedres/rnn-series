@@ -104,7 +104,7 @@ class Experiment(object):
                 print(ws)
                 print(hr)
                 print("----------------------------------------------------")
-                self._model.configure(features_by_timestep=ws)
+                self._model.configure(timesteps=ws)
                 # Cadena que describe el formato de la entrada
                 input_descriptor_string = 'ws'+str(ws) + '_' + \
                               'h'+str(hr) + '_' + \
