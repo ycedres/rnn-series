@@ -74,7 +74,8 @@ class InputManager(object):
 
         # TODO: Comprobar
         if date is not None:
-            ts = ts.ix[date]
+            #ts = ts.ix[date]
+            ts = ts.loc[date]
 
         upper_bound = len(ts) - (window_size + horizon + padding - 1)
         lower_bound = padding
