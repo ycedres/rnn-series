@@ -7,7 +7,7 @@ from output_manager.output_manager import OutputManager
 from runner.runner import LocalRunner,TrainOperation,TestOperation
 
 from models.ml.KNNRegressor import KNNRegressor
-from models.ml.DecisionTreeRegressor import RDecisionTree
+#from models.ml.DecisionTreeRegressor import RDecisionTree
 from models.ml.RSupportVector import RSupportVector
 from models.ml.RLSTM import RLSTM
 from crossvalidation.train_test_split import TrainTestSplit
