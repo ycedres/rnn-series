@@ -6,8 +6,9 @@ plt.style.use('ggplot')
 
 class OutputManager(object):
 
-    def __init__(self,output_file=''):
+    def __init__(self,output_file='',expindex=-1):
         self._df_prediction = None
+        self._expindex = expindex
         pass
 
     def save(self,option='file'):
@@ -25,6 +26,9 @@ class OutputManager(object):
        self._horizon = horizon
        self._output_filename = output_filename
        self._input_descriptor_string = input_descriptor_string
+       print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@ "+str(self._expindex))
+       if (self._expindex > -1): 
+           self._input_descriptor_string = self._input_descriptor_string + '_' + str(self._expindex)
 
     def print_output(self,data):
         print(data)

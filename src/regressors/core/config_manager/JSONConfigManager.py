@@ -46,6 +46,9 @@ class JSONConfigManager(ConfigManager):
     def get_horizon_range(self):
         return self._config["features"]["horizon_range"]
 
+    def get_istimeindex(self):
+        return self._config["features"]["istimeindex"]
+
     #Returns {'knn':{(opt1,val1),(opt2,val2)},'lstm':{(opt1,val1),(opt2,val2)}}
     def get_model_config(self,name):
         return self._config['experiments'][name]["model_parameters"]

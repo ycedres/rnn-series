@@ -1,0 +1,43 @@
+{
+
+    "data": {
+    "basedir" : "/home/ycedres/Projects/PhD/supplychain/",
+    "filename" : "caso1Datos.csv",
+    "output_basedir" : "/tmp/supplychain/sequential"
+    },
+    
+    "features" : {
+    "window_size" : 15,
+    "step_size" : 1,
+    "padding" : 0,
+    "horizon_range" : {"start":1,"end":1},
+    "window_range" : {"start":10,"end":10},
+    "istimeindex" : false,
+    "method" : "sequential"
+    },
+    
+    
+    "experiments" : {
+    
+    "RConv1D" : {
+    
+    "train_parameters": {
+      "batch_size": 2,
+      "epochs": 1
+    },
+    "description": "Conv1D",
+    "model_parameters" : {
+      "input_shape": {"0":0,"1":10},
+      "timesteps": 10,
+      "features_by_timestep": 1
+    }
+    
+    }
+    
+    
+    
+    
+    }
+    
+    }
+    

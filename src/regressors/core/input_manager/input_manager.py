@@ -98,7 +98,10 @@ class InputManager(object):
 
         i = 0
         for t in range(lower_bound, upper_bound,step_size):
-            df_index[i]=ts.index[t].to_pydatetime()
+            if isinstance(ts.index[t],int):
+                df_index[i]=ts.index[i]
+            else:
+                df_index[i]=ts.index[t].to_pydatetime()
             features[i][0: window_size] = ts[t: t + window_size]
             h_offset = t + window_size + horizon - 1
             labels[i] = ts[h_offset]

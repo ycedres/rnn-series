@@ -2,7 +2,6 @@ import sys
 sys.path.insert(0, '../')
 
 from crossvalidation.csv_input_manager import CSVInputManager
-from input_manager.nrel_input_manager import NRELInputManager
 from output_manager.output_manager import OutputManager
 from runner.runner import LocalRunner,TrainOperation,TestOperation
 
@@ -139,8 +138,12 @@ class Experiment(object):
 
                 if os.path.exists(output_filename_path_dataframe):
                     print("output_filename_path_dataframe: " + output_filename_path_dataframe + " @@@@@@@@@@@@@@@@@@@@@@ EXISTE")
-                    parse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
-                    df = pd.read_csv(output_filename_path_dataframe,sep=';',date_parser=parse,index_col=0)
+                    istimeindex = self._config_manager.get_istimeindex()
+                    if istimeindex:
+                        parse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
+                        df = pd.read_csv(output_filename_path_dataframe,sep=';',date_parser=parse,index_col=0)
+                    else:
+                        df = pd.read_csv(output_filename_path_dataframe,sep=';',index_col=0)
                     self._input_manager.load_dataframe(df)
                 else:
                     print("@@@@@@@@@@@@@@@@@@@@@@ NO EXISTE")
@@ -258,7 +261,7 @@ if __name__ == "__main__":
     local_runner = LocalRunner()
 
     # INPUT MANAGER
-    input_manager = NRELInputManager()
+    input_manager = InputManager()
     input_manager.configure_load_datasource(method='filesystem',
     filename=basedir+filename)
 
