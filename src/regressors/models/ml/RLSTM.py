@@ -36,8 +36,8 @@ class RLSTM(object):
         self._input_descriptor_string = input_descriptor_string
 
 
-    def configure(self,features_by_timestep):
-        self._reg = self._create_model(features_by_timestep , 1)
+    def configure(self,timesteps):
+        self._reg = self._create_model(timesteps , 1)
 
     def configure_train(self,config):
         self._batch_size = config['batch_size']
